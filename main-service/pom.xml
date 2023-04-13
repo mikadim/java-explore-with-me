@@ -15,6 +15,7 @@
         <maven.compiler.source>11</maven.compiler.source>
         <maven.compiler.target>11</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <stat-client.version>0.0.1-SNAPSHOT</stat-client.version>
     </properties>
 
     <dependencies>
@@ -25,7 +26,7 @@
         <dependency>
             <groupId>ru.practicum</groupId>
             <artifactId>stat-client</artifactId>
-            <version>0.0.1-SNAPSHOT</version>
+            <version>${stat-client.version}</version>
         </dependency>
     </dependencies>
 
