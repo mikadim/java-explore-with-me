@@ -23,9 +23,9 @@ public class RestClient {
 
     public RestClient(@Value("${stat-server.url}") String serverUrl, RestTemplateBuilder builder) {
         rest = builder
-                . uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
-                        .requestFactory(HttpComponentsClientHttpRequestFactory::new)
-                        .build();
+                .uriTemplateHandler(new DefaultUriBuilderFactory(serverUrl))
+                .requestFactory(HttpComponentsClientHttpRequestFactory::new)
+                .build();
     }
 
     public RestClient(RestTemplate rest) {
@@ -38,7 +38,7 @@ public class RestClient {
         parameters.put("start", start.format(formatter));
         parameters.put("end", end.format(formatter));
         parameters.put("unique", unique);
-        if(!StringUtils.isEmpty(uris)) {
+        if (!StringUtils.isEmpty(uris)) {
             parameters.put("uris", uris);
             path = "/stats?start={start}&end={end}&unique={unique}&uris={uris}";
         } else {
