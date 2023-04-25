@@ -107,7 +107,7 @@ public class EventServiceImpl implements EventService {
             if (eventFullDto.getParticipantLimit() == 0 || !eventFullDto.getRequestModeration()) {
                 return new EventRequestStatusUpdateResultDto();
             }
-            if (eventFullDto.getParticipantLimit() == eventFullDto.getConfirmedRequests()) {
+            if (eventFullDto.getParticipantLimit().equals(eventFullDto.getConfirmedRequests())) {
                 throw new ConstraintException("The participant limit has been reached");
             }
         }
@@ -149,7 +149,7 @@ public class EventServiceImpl implements EventService {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Event with id=%d was not found", eventId)));
 
-        if (!adminStatus && event.getInitiator().getId() != userId) {
+        if (!adminStatus && !Objects.equals(event.getInitiator().getId(), userId)) {
             throw new ObjectNotFoundException(String.format("Event with id=%d was not available", eventId));
         }
         if (!adminStatus && event.getState() == EventStatus.PUBLISHED) {
@@ -249,8 +249,10 @@ public class EventServiceImpl implements EventService {
             switch (sort.trim().toLowerCase()) {
                 case "event_date":
                     comparing = Comparator.comparing(EventShortDto::getEventDate);
+                    break;
                 case "views":
                     comparing = Comparator.comparing(EventShortDto::getViews);
+                    break;
             }
         return new PageImpl<>(eventDtos.stream().sorted(comparing).collect(Collectors.toList()),
                 eventDtosPage.getPageable(), eventDtosPage.getTotalElements());
