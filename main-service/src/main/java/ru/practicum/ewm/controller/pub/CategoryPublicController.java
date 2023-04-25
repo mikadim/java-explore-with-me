@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.service.CategoryService;
 
+import java.util.List;
+
 
 @Slf4j
 @AllArgsConstructor
@@ -18,10 +20,11 @@ public class CategoryPublicController {
     private final CategoryService service;
 
     @GetMapping
-    public ResponseEntity<Page<CategoryDto>> getCategories(@RequestParam(name = "from", defaultValue = "0") Integer from,
+    public ResponseEntity<List<CategoryDto>> getCategories(@RequestParam(name = "from", defaultValue = "0") Integer from,
                                                            @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получение категорий с позиции={}, размер={}", from, size);
-        return new ResponseEntity<>(service.getCategories(from, size), HttpStatus.OK);
+        Page<CategoryDto> categories = service.getCategories(from, size);
+        return new ResponseEntity<>(categories.getContent(), HttpStatus.OK);
     }
 
     @GetMapping("/{catId}")
