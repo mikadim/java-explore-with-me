@@ -36,8 +36,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class EventServiceImpl implements EventService {
-    private final static String EVENT_PATH = "/events/";
-    private final static String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
+    private static final String EVENT_PATH = "/events/";
+    private static final String DATE_TIME_FORMATTER = "yyyy-MM-dd HH:mm:ss";
     private final EventRepository eventRepository;
     private final UserRepository userRepository;
     private final RequestRepository requestRepository;
@@ -196,17 +196,14 @@ public class EventServiceImpl implements EventService {
         if (dto.getRequestModeration() != null) {
             event.setRequestModeration(dto.getRequestModeration());
         }
-        if (dto.getStateAction() != null) {
+        if (dto.getStateAction() != null && !((dto.getStateAction() == StateActionStatusDto.REJECT_EVENT ||
+                dto.getStateAction() == StateActionStatusDto.PUBLISH_EVENT) && !adminStatus)) {
             StateActionStatusDto state = dto.getStateAction();
-            if ((state == StateActionStatusDto.REJECT_EVENT || state == StateActionStatusDto.PUBLISH_EVENT) && !adminStatus) {
-
-            } else {
-                EventStatus eventStatus = StateActionStatusDto.getEventStatus(state)
-                        .orElseThrow(() -> new IllegalArgumentException("Bad state value"));
-                event.setState(eventStatus);
-                if (state == StateActionStatusDto.PUBLISH_EVENT) {
-                    event.setPublishedOn(LocalDateTime.now());
-                }
+            EventStatus eventStatus = StateActionStatusDto.getEventStatus(state)
+                    .orElseThrow(() -> new IllegalArgumentException("Bad state value"));
+            event.setState(eventStatus);
+            if (state == StateActionStatusDto.PUBLISH_EVENT) {
+                event.setPublishedOn(LocalDateTime.now());
             }
         }
         if (!StringUtils.isEmpty(dto.getTitle())) {
@@ -222,9 +219,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventFullDto> getEventsByFilters
-            (List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
-             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
+    public Page<EventFullDto> getEventsByFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
+                                                 LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
 
         Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "eventDate");
         Pageable page = PageRequest.of(from / size, size, sortByEventDate);

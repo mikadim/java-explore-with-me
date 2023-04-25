@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @NoArgsConstructor
 public class EventShortDto {
-    private final static String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private String annotation;
     private CategoryDto category;
     private Long confirmedRequests;

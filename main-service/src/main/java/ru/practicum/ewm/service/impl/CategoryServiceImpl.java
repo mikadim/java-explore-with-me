@@ -8,7 +8,6 @@ import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.exception.ObjectNotFoundException;
 import ru.practicum.ewm.mapper.CategoryMapper;
 import ru.practicum.ewm.model.Category;
-import ru.practicum.ewm.model.Compilation;
 import ru.practicum.ewm.repository.CategoryRepository;
 import ru.practicum.ewm.service.CategoryService;
 

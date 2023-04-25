@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import ru.practicum.ewm.model.Compilation;
 
 public interface CompilationRepository extends JpaRepository<Compilation, Long> {
-    @Query( "select c " +
+    @Query("select c " +
             "from Compilation c " +
             "where (?1 is null or c.pinned = ?1)"
     )

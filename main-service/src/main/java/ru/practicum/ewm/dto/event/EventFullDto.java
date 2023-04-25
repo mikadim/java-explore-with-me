@@ -16,7 +16,7 @@ import java.time.format.DateTimeFormatter;
 @Data
 @NoArgsConstructor
 public class EventFullDto {
-    private final static String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private String annotation;
     private CategoryDto category;
     private Integer confirmedRequests;
