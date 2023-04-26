@@ -11,7 +11,6 @@ import ru.practicum.ewm.dto.user.UserDto;
 import ru.practicum.ewm.service.UserService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.PositiveOrZero;
 import java.util.List;

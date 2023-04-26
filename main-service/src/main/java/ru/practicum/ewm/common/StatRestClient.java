@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.practicum.RestClient;
 
 @Component
-public class StatRestClient extends RestClient{
+public class StatRestClient extends RestClient {
 
     @Autowired
     public StatRestClient(@Value("${stat-server.url}") String url, RestTemplateBuilder builder) {

@@ -229,10 +229,8 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventFullDto> getEventsByFilters
-            (List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
+    public Page<EventFullDto> getEventsByFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
              LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
-
         Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "eventDate");
         Pageable page = PageRequest.of(from / size, size, sortByEventDate);
         Page<EventFullDto> eventDtosPage = eventRepository.getAllUserEvents(userIds, eventStatus, categories, rangeStart,

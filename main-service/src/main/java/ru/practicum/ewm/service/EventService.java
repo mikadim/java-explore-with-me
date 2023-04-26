@@ -3,7 +3,6 @@ package ru.practicum.ewm.service;
 import org.springframework.data.domain.Page;
 import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.event.eventupdate.UpdateEventRequestDto;
-import ru.practicum.ewm.dto.event.eventupdate.UpdateEventUserRequestDto;
 import ru.practicum.ewm.model.Event;
 import ru.practicum.ewm.model.EventStatus;
 
