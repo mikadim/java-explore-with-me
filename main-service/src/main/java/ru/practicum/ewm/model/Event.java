@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "events")
 public class Event {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
     @Column(nullable = false, length = 2000)
     private String annotation;
     @ManyToOne(targetEntity = Category.class, fetch = FetchType.LAZY)
@@ -24,9 +27,6 @@ public class Event {
     private String description;
     @Column(name = "event_date", nullable = false)
     private LocalDateTime eventDate;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
     @ManyToOne(targetEntity = User.class, fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
     private User initiator;

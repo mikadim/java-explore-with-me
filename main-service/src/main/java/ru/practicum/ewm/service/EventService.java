@@ -2,6 +2,8 @@ package ru.practicum.ewm.service;
 
 import org.springframework.data.domain.Page;
 import ru.practicum.ewm.dto.event.*;
+import ru.practicum.ewm.dto.event.eventupdate.UpdateEventRequestDto;
+import ru.practicum.ewm.dto.event.eventupdate.UpdateEventUserRequestDto;
 import ru.practicum.ewm.model.Event;
 import ru.practicum.ewm.model.EventStatus;
 
@@ -19,7 +21,7 @@ public interface EventService {
 
     EventRequestStatusUpdateResultDto updateRequestsStatuses(Long userId, Long eventId, EventRequestStatusUpdateRequest dto);
 
-    EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequestDto dto, Boolean adminStatus);
+    <T extends UpdateEventRequestDto> EventFullDto updateEvent(Long userId, Long eventId, T dto);
 
     Page<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size);
 

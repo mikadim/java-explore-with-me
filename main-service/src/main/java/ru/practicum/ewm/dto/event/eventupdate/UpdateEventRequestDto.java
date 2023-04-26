@@ -1,4 +1,4 @@
-package ru.practicum.ewm.dto.event;
+package ru.practicum.ewm.dto.event.eventupdate;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.AllArgsConstructor;
@@ -14,7 +14,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Data
-public class UpdateEventUserRequestDto {
+public class UpdateEventRequestDto {
     @Length(min = 20, max = 2000)
     private String annotation;
     @Positive
@@ -28,7 +28,6 @@ public class UpdateEventUserRequestDto {
     @PositiveOrZero
     private Integer participantLimit;
     private Boolean requestModeration;
-    private StateActionStatusDto stateAction;
     @Length(min = 3, max = 120)
     private String title;
 }

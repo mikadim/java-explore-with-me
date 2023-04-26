@@ -6,22 +6,27 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
-import ru.practicum.ewm.dto.event.UpdateEventUserRequestDto;
+import ru.practicum.ewm.dto.event.eventupdate.UpdateEventAdminRequestDto;
+import ru.practicum.ewm.dto.event.eventupdate.UpdateEventUserRequestDto;
 import ru.practicum.ewm.model.EventStatus;
 import ru.practicum.ewm.service.EventService;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
+@Validated
 @AllArgsConstructor
-@RestController
+@Controller
 @RequestMapping("/admin/events")
 public class EventController {
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -33,8 +38,8 @@ public class EventController {
                                                             @RequestParam(name = "categories", required = false) List<Integer> categories,
                                                             @RequestParam(name = "rangeStart", required = false) String rangeStart,
                                                             @RequestParam(name = "rangeEnd", required = false) String rangeEnd,
-                                                            @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                            @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                            @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получение событий пользователей id={}", users);
         LocalDateTime start = null;
         if (!StringUtils.isEmpty(rangeStart)) {
@@ -59,9 +64,9 @@ public class EventController {
     }
 
     @PatchMapping("/{eventId}")
-    public ResponseEntity<EventFullDto> updateEvent(@RequestBody @NotNull UpdateEventUserRequestDto dto,
+    public ResponseEntity<EventFullDto> updateEvent(@RequestBody UpdateEventAdminRequestDto dto,
                                                     @PathVariable(name = "eventId") Long eventId) {
         log.info("Обновление события id={} на: {}", eventId, dto);
-        return new ResponseEntity<>(eventService.updateEvent(null, eventId, dto, true), HttpStatus.OK);
+        return new ResponseEntity<>(eventService.updateEvent(null, eventId, dto), HttpStatus.OK);
     }
 }

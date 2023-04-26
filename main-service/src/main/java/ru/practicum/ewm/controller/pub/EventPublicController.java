@@ -6,19 +6,24 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Slf4j
+@Validated
 @AllArgsConstructor
-@RestController
+@Controller
 @RequestMapping("/events")
 public class EventPublicController {
     private final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -32,8 +37,8 @@ public class EventPublicController {
                                                          @RequestParam(name = "rangeEnd", required = false) String rangeEnd,
                                                          @RequestParam(name = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
                                                          @RequestParam(name = "sort", required = false) String sort,
-                                                         @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                         @RequestParam(name = "size", defaultValue = "10") Integer size,
+                                                         @PositiveOrZero  @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                         @Positive @RequestParam(name = "size", defaultValue = "10") Integer size,
                                                          HttpServletRequest request) {
         log.info("Получение событий с позиции={}, размер={}", from, size);
         eventService.postRequestToStat(request);

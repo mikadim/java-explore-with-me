@@ -2,6 +2,7 @@ package ru.practicum.ewm.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.hibernate.exception.ConstraintViolationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -71,5 +72,23 @@ public class ErrorHandler {
     public ResponseEntity<ApiErrorDto> missingServletRequestParameterHandler(final IllegalArgumentException e) {
         log.debug(e.getMessage());
         return new ResponseEntity<>(new ApiErrorDto("BAD_REQUEST", "Incorrectly made request", e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(javax.validation.ConstraintViolationException.class)
+    public ResponseEntity<ApiErrorDto> overExceptionHandler(final javax.validation.ConstraintViolationException e) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(new ApiErrorDto("BAD_REQUEST", "Incorrectly made request", e.getMessage()), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiErrorDto> dataIntegrityViolationExceptionHandler(final DataIntegrityViolationException e) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(new ApiErrorDto("CONFLICT", "Integrity constraint has been violated", e.getMessage()), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiErrorDto> overExceptionHandler(final Exception e) {
+        log.debug(e.getMessage());
+        return new ResponseEntity<>(new ApiErrorDto("INTERNAL_SERVER_ERROR", "Unknown error", e.getMessage()), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

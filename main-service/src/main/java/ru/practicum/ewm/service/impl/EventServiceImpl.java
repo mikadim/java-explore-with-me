@@ -6,17 +6,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
-import ru.practicum.RestClient;
 import ru.practicum.dto.StatCountDto;
 import ru.practicum.dto.StatDto;
+import ru.practicum.ewm.common.StatRestClient;
 import ru.practicum.ewm.dto.RequestStatusUpdateStatuses;
 import ru.practicum.ewm.dto.event.*;
+import ru.practicum.ewm.dto.event.eventupdate.UpdateEventAdminRequestDto;
+import ru.practicum.ewm.dto.event.eventupdate.UpdateEventRequestDto;
+import ru.practicum.ewm.dto.event.eventupdate.UpdateEventUserRequestDto;
 import ru.practicum.ewm.exception.ConstraintException;
 import ru.practicum.ewm.exception.ObjectNotFoundException;
 import ru.practicum.ewm.mapper.EventMapper;
@@ -43,22 +45,21 @@ public class EventServiceImpl implements EventService {
     private final RequestRepository requestRepository;
     private final CategoryRepository categoryRepository;
     private final EventMapper mapper;
-    private final RestClient restClient;
+    private final StatRestClient restClient;
     private final ObjectMapper objectMapper;
     private final RequestMapper requestMapper;
     private final String applicationName;
 
     @Autowired
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository, RequestRepository requestRepository,
-                            CategoryRepository categoryRepository, EventMapper mapper, RestTemplateBuilder builder,
-                            @Value("${stat-server.url}") String url, ObjectMapper objectMapper, RequestMapper requestMapper,
-                            @Value("${spring.application.name}") String appName) {
+                            CategoryRepository categoryRepository, EventMapper mapper, StatRestClient restClient,
+                            ObjectMapper objectMapper, RequestMapper requestMapper, @Value("${spring.application.name}") String appName) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.requestRepository = requestRepository;
         this.categoryRepository = categoryRepository;
         this.mapper = mapper;
-        this.restClient = new RestClient(url, builder);
+        this.restClient = restClient;
         this.objectMapper = objectMapper;
         this.requestMapper = requestMapper;
         this.applicationName = appName;
@@ -145,35 +146,27 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public EventFullDto updateEvent(Long userId, Long eventId, UpdateEventUserRequestDto dto, Boolean adminStatus) {
+    public <T extends UpdateEventRequestDto> EventFullDto updateEvent(Long userId, Long eventId, T dto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Event with id=%d was not found", eventId)));
 
-        if (!adminStatus && !Objects.equals(event.getInitiator().getId(), userId)) {
-            throw new ObjectNotFoundException(String.format("Event with id=%d was not available", eventId));
-        }
-        if (!adminStatus && event.getState() == EventStatus.PUBLISHED) {
-            throw new ConstraintException("Only pending or canceled events can be changed");//проверить reason
-        }
         if (dto.getEventDate() != null && dto.getEventDate().minusHours(2).isBefore(LocalDateTime.now())) {
             throw new ConstraintException("Field: eventDate. Error: должно содержать дату, которая еще ненаступила. " +
                     "Value: " + dto.getEventDate());
         }
-        if (dto.getStateAction() != null && dto.getStateAction() == StateActionStatusDto.PUBLISH_EVENT &&
-                event.getState() != EventStatus.PENDING) {
-            throw new ConstraintException("Cannot publish the event because it's not in the right state: PUBLISHED");
+        if (dto instanceof UpdateEventUserRequestDto) {
+            checkEventParametersWhenUserUpdateIt(event, (UpdateEventUserRequestDto) dto, userId);
         }
-        if (dto.getStateAction() != null && dto.getStateAction() == StateActionStatusDto.REJECT_EVENT &&
-                event.getState() == EventStatus.PUBLISHED) {
-            throw new ConstraintException("Cannot reject the event because it's not in the right state: PUBLISHED");
+        if (dto instanceof UpdateEventAdminRequestDto) {
+            checkEventParametersWhenAdminUpdateIt(event, (UpdateEventAdminRequestDto) dto);
         }
-        if (!StringUtils.isEmpty(dto.getAnnotation())) {
+        if (!StringUtils.isBlank(dto.getAnnotation())) {
             event.setAnnotation(dto.getAnnotation());
         }
         if (dto.getCategory() != null) {
             event.setCategory(categoryRepository.getReferenceById(dto.getCategory()));
         }
-        if (!StringUtils.isEmpty(dto.getDescription())) {
+        if (!StringUtils.isBlank(dto.getDescription())) {
             event.setDescription(dto.getDescription());
         }
         if (dto.getEventDate() != null) {
@@ -196,22 +189,39 @@ public class EventServiceImpl implements EventService {
         if (dto.getRequestModeration() != null) {
             event.setRequestModeration(dto.getRequestModeration());
         }
-        if (dto.getStateAction() != null && !((dto.getStateAction() == StateActionStatusDto.REJECT_EVENT ||
-                dto.getStateAction() == StateActionStatusDto.PUBLISH_EVENT) && !adminStatus)) {
-            StateActionStatusDto state = dto.getStateAction();
-            EventStatus eventStatus = StateActionStatusDto.getEventStatus(state)
-                    .orElseThrow(() -> new IllegalArgumentException("Bad state value"));
-            event.setState(eventStatus);
-            if (state == StateActionStatusDto.PUBLISH_EVENT) {
-                event.setPublishedOn(LocalDateTime.now());
+        if (dto instanceof UpdateEventUserRequestDto) {
+            if (((UpdateEventUserRequestDto) dto).getStateAction() != null) {
+                UpdateEventUserRequestDto.StateActionStatus stateActionStatus = ((UpdateEventUserRequestDto) dto).getStateAction();
+                UpdateEventUserRequestDto.StateActionStatus.getEventStatus(stateActionStatus)
+                        .ifPresent(status -> {
+                            event.setState(status);
+                        });
+            }
+
+        }
+        if (dto instanceof UpdateEventAdminRequestDto) {
+            if (((UpdateEventAdminRequestDto) dto).getStateAction() != null) {
+                UpdateEventAdminRequestDto.StateActionStatus stateActionStatus = ((UpdateEventAdminRequestDto) dto).getStateAction();
+                UpdateEventAdminRequestDto.StateActionStatus.getEventStatus(stateActionStatus)
+                        .ifPresent(status -> {
+                            event.setState(status);
+                            if (status == EventStatus.PUBLISHED) {
+                                event.setPublishedOn(LocalDateTime.now());
+                            }
+                        });
             }
         }
-        if (!StringUtils.isEmpty(dto.getTitle())) {
+        if (!StringUtils.isBlank(dto.getTitle())) {
             event.setTitle(dto.getTitle());
         }
         eventRepository.save(event);
-        return getUserEventById(userId, eventId);
+        return
+
+                getUserEventById(userId, eventId);
+
     }
+
+
 
     @Override
     public Page<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size) {
@@ -219,8 +229,9 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventFullDto> getEventsByFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
-                                                 LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
+    public Page<EventFullDto> getEventsByFilters
+            (List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
+             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
 
         Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "eventDate");
         Pageable page = PageRequest.of(from / size, size, sortByEventDate);
@@ -235,7 +246,7 @@ public class EventServiceImpl implements EventService {
             paid, LocalDateTime rangeStart,
                                                           LocalDateTime rangeEnd, Boolean onlyAvailable, String sort,
                                                           Integer from, Integer size) {
-        if (!StringUtils.isEmpty(text)) {
+        if (!StringUtils.isBlank(text)) {
             text = text.trim().toLowerCase();
         }
         Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "id");
@@ -245,7 +256,7 @@ public class EventServiceImpl implements EventService {
         List<EventShortDto> eventDtos = setViewsEventShortDto(eventDtosPage.getContent());
 
         Comparator<EventShortDto> comparing = Comparator.comparing(EventShortDto::getId);
-        if (!StringUtils.isEmpty(sort))
+        if (!StringUtils.isBlank(sort))
             switch (sort.trim().toLowerCase()) {
                 case "event_date":
                     comparing = Comparator.comparing(EventShortDto::getEventDate);
@@ -290,7 +301,11 @@ public class EventServiceImpl implements EventService {
 
     private List<EventFullDto> setViewsEventFullDto(List<EventFullDto> eventFullDto) {
         Set<Long> eventsId = eventFullDto.stream().map(EventFullDto::getId).collect(Collectors.toSet());
-        Map<Long, Long> stats = getStats(LocalDateTime.of(2000, 1, 1, 00, 00), LocalDateTime.now(), false, eventsId);
+        LocalDateTime startCountEventViews = eventFullDto.stream()
+                .filter(dto -> dto.getPublishedOn() != null)
+                .map(EventFullDto::getPublishedOn)
+                .min(LocalDateTime::compareTo).or(() -> Optional.of(LocalDateTime.now())).get();
+        Map<Long, Long> stats = getStats(startCountEventViews, LocalDateTime.now(), true, eventsId);
         if (stats.size() > 0) {
             for (EventFullDto dto : eventFullDto) {
                 if (stats.containsKey(dto.getId())) {
@@ -323,6 +338,28 @@ public class EventServiceImpl implements EventService {
             return resultMap;
         } else {
             return Collections.emptyMap();
+        }
+    }
+
+    private void checkEventParametersWhenUserUpdateIt(Event event, UpdateEventUserRequestDto dto, Long userId) {
+        if (!Objects.equals(event.getInitiator().getId(), userId)) {
+            throw new ObjectNotFoundException(String.format("Event with id=%d was not available", event.getId()));
+        }
+        if (event.getState() == EventStatus.PUBLISHED) {
+            throw new ConstraintException("Only pending or canceled events can be changed");
+        }
+    }
+
+    private void checkEventParametersWhenAdminUpdateIt(Event event, UpdateEventAdminRequestDto dto) {
+        if (dto.getStateAction() != null) {
+            if (dto.getStateAction() == UpdateEventAdminRequestDto.StateActionStatus.PUBLISH_EVENT &&
+                    event.getState() != EventStatus.PENDING) {
+                throw new ConstraintException("Cannot publish the event because it's not in the right state: PUBLISHED");
+            }
+            if (dto.getStateAction() == UpdateEventAdminRequestDto.StateActionStatus.REJECT_EVENT &&
+                    event.getState() == EventStatus.PUBLISHED) {
+                throw new ConstraintException("Cannot reject the event because it's not in the right state: PUBLISHED");
+            }
         }
     }
 }

@@ -16,20 +16,23 @@ import java.time.format.DateTimeFormatter;
 @Data
 @NoArgsConstructor
 public class EventFullDto {
-    private static final String TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final DateTimeFormatter DATE_TIME_FORMATTER =DateTimeFormatter.ofPattern(DATE_TIME_FORMAT);
     private String annotation;
     private CategoryDto category;
     private Integer confirmedRequests;
-    private String createdOn;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
+    private LocalDateTime createdOn;
     private String description;
-    @JsonFormat(pattern = TIME_FORMAT)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
     private LocalDateTime eventDate;
     private Long id;
     private UserShortDto initiator;
     private LocationDto location;
     private Boolean paid;
     private Integer participantLimit;
-    private String publishedOn;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = DATE_TIME_FORMAT)
+    private LocalDateTime publishedOn;
     private Boolean requestModeration;
     private EventStatus state;
     private String title;
@@ -41,7 +44,7 @@ public class EventFullDto {
         this.annotation = annotation;
         this.category = new CategoryDto(category.getId(), category.getName());
         this.confirmedRequests = Math.toIntExact(confirmedRequest);
-        this.createdOn = createdOn.format(DateTimeFormatter.ofPattern(TIME_FORMAT));
+        this.createdOn = createdOn;
         this.description = description;
         this.eventDate = eventDate;
         this.id = id;
@@ -49,7 +52,7 @@ public class EventFullDto {
         this.location = new LocationDto(lat, lon);
         this.paid = paid;
         this.participantLimit = participantLimit;
-        this.publishedOn = publishedOn == null ? null : publishedOn.format(DateTimeFormatter.ofPattern(TIME_FORMAT));
+        this.publishedOn = publishedOn;
         this.requestModeration = requestModeration;
         this.state = state;
         this.title = title;

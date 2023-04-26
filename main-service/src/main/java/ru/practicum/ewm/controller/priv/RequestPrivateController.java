@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.ParticipationRequestDto;
 import ru.practicum.ewm.service.RequestService;
@@ -12,14 +13,14 @@ import java.util.List;
 
 @Slf4j
 @AllArgsConstructor
-@RestController
+@Controller
 @RequestMapping("/users/{userId}/requests")
 public class RequestPrivateController {
     private final RequestService service;
 
     @PostMapping
     public ResponseEntity<ParticipationRequestDto> createRequest(@PathVariable(name = "userId") Long userId,
-                                                                 @RequestParam(name = "eventId", required = true) Long eventId) {
+                                                                 @RequestParam(name = "eventId") Long eventId) {
         log.info("Добавление запроса на участие в событии id={}, пользователь id={}", eventId, userId);
         return new ResponseEntity(service.createRequest(userId, eventId), HttpStatus.CREATED);
     }

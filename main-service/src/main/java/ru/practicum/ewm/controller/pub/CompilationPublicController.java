@@ -5,15 +5,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
 import ru.practicum.ewm.service.CompilationService;
 
+import javax.validation.constraints.Positive;
+import javax.validation.constraints.PositiveOrZero;
 import java.util.List;
 
 @Slf4j
+@Validated
 @AllArgsConstructor
-@RestController
+@Controller
 @RequestMapping("/compilations")
 public class CompilationPublicController {
     private final CompilationService service;
@@ -26,8 +31,8 @@ public class CompilationPublicController {
 
     @GetMapping()
     public ResponseEntity<List<CompilationDto>> getCompilations(@RequestParam(value = "pinned", required = false) Boolean pinned,
-                                                                @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                                @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                                @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                                @Positive  @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получение категорий с позиции={}, размер={}", from, size);
         Page<CompilationDto> compilations = service.getCompilations(pinned, from, size);
         return new ResponseEntity<>(compilations.getContent(), HttpStatus.OK);

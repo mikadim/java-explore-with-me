@@ -12,9 +12,7 @@ import ru.practicum.ewm.model.User;
 import ru.practicum.ewm.repository.UserRepository;
 import ru.practicum.ewm.service.UserService;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -44,14 +42,10 @@ public class UserServiceImpl implements UserService {
             Pageable page = PageRequest.of(from / size, size, sortById);
             Page<User> usersPage = repository.findAll(page);
             userDtos = mapper.toUserDtos(usersPage.getContent());
-            return new PageImpl<>(userDtos.stream()
-                    .sorted(Comparator.comparing(UserDto::getId))
-                    .collect(Collectors.toList()), usersPage.getPageable(), usersPage.getTotalElements());
+            return new PageImpl<>(userDtos, usersPage.getPageable(), usersPage.getTotalElements());
         } else {
             userDtos = mapper.toUserDtos(repository.findAllById(ids));
-            return new PageImpl<>(userDtos.stream()
-                    .sorted(Comparator.comparing(UserDto::getId))
-                    .collect(Collectors.toList()));
+            return new PageImpl<>(userDtos);
         }
     }
 }

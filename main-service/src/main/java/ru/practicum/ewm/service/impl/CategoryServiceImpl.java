@@ -11,9 +11,7 @@ import ru.practicum.ewm.model.Category;
 import ru.practicum.ewm.repository.CategoryRepository;
 import ru.practicum.ewm.service.CategoryService;
 
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -49,9 +47,7 @@ public class CategoryServiceImpl implements CategoryService {
         Pageable page = PageRequest.of(from / size, size, sortById);
         Page<Category> categoriesPage = repository.findAll(page);
         List<CategoryDto> categoryDtos = mapper.toCategoryDtos(categoriesPage.getContent());
-        return new PageImpl<>(categoryDtos.stream()
-                .sorted(Comparator.comparing(CategoryDto::getId))
-                .collect(Collectors.toList()), categoriesPage.getPageable(), categoriesPage.getTotalElements());
+        return new PageImpl<>(categoryDtos, categoriesPage.getPageable(), categoriesPage.getTotalElements());
     }
 
     @Override
