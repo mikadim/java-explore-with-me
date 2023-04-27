@@ -218,7 +218,6 @@ public class EventServiceImpl implements EventService {
         if (!StringUtils.isBlank(dto.getTitle())) {
             event.setTitle(dto.getTitle());
         }
-       // eventRepository.save(event);
         return getUserEventById(userId, eventId);
     }
 

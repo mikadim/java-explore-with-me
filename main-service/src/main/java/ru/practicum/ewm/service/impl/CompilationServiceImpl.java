@@ -63,7 +63,6 @@ public class CompilationServiceImpl implements CompilationService {
         if (!StringUtils.isEmpty(dto.getTitle())) {
             compilation.setTitle(dto.getTitle());
         }
-      //  compilationRepository.save(compilation);
         CompilationDto compilationDto = mapper.toCompilationDto(compilation);
         compilationDto.setEvents(eventService.getEventsList(compilation.getEvents()));
         return compilationDto;

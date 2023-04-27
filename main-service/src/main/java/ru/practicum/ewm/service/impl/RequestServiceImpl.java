@@ -71,7 +71,6 @@ public class RequestServiceImpl implements RequestService {
                 .orElseThrow(() -> new ObjectNotFoundException("Request with idss=" + requestId + " was not found"));
         if (request.getStatus() != RequestStatus.CANCELED) {
             request.setStatus(RequestStatus.CANCELED);
-    //        requestRepository.save(request);
         }
         return mapper.toParticipationRequestDto(request);
     }
