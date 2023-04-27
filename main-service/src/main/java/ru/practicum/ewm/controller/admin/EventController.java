@@ -48,7 +48,7 @@ public class EventController {
                         "IllegalArgumentException: For input string: " + state)));
             }
         }
-        Page<EventFullDto> eventsByFilters = eventService.getEventsByFilters(users, eventStatuses, categories, rangeStart, rangeEnd, from,
+        Page<EventFullDto> eventsByFilters = eventService.getEventsForPrivateUsersWithFilters(users, eventStatuses, categories, rangeStart, rangeEnd, from,
                 size, null);
         return new ResponseEntity<>(eventsByFilters.getContent(), HttpStatus.OK);
     }

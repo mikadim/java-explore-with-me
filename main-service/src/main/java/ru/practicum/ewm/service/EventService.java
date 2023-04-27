@@ -24,15 +24,15 @@ public interface EventService {
 
     Page<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size);
 
-    Page<EventFullDto> getEventsByFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
-                                          LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size,
-                                          Long eventId);
+    Page<EventFullDto> getEventsForPrivateUsersWithFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
+                                                           LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size,
+                                                           Long eventId);
 
-    Page<EventShortDto> getEventsByFiltersShortDto(String text, List<Integer> categories, Boolean paid,
-                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
-                                                   String sort, Integer from, Integer size);
+    Page<EventShortDto> getEventsForPublicUsersWithFilters(String text, List<Integer> categories, Boolean paid,
+                                                           LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
+                                                           String sort, Integer from, Integer size);
 
-    EventFullDto getEventBuIdShortDto(Long id);
+    EventFullDto getPublishedEventById(Long id);
 
-    void postRequestToStat(HttpServletRequest request);
+    void addStatisticsToStatServer(HttpServletRequest request);
 }

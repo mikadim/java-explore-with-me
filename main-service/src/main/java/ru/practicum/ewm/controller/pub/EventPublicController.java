@@ -36,16 +36,16 @@ public class EventPublicController {
                                                          @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeEnd,
                                                          @RequestParam(name = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
                                                          @RequestParam(name = "sort", required = false) String sort,
-                                                         @PositiveOrZero  @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                         @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                          @Positive @RequestParam(name = "size", defaultValue = "10") Integer size,
                                                          HttpServletRequest request) {
         log.info("Получение событий с позиции={}, размер={}", from, size);
-        eventService.postRequestToStat(request);
+        eventService.addStatisticsToStatServer(request);
 
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
         }
-        Page<EventShortDto> events = eventService.getEventsByFiltersShortDto(text, categories, paid, rangeStart, rangeEnd,
+        Page<EventShortDto> events = eventService.getEventsForPublicUsersWithFilters(text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, from, size);
         return new ResponseEntity<>(events.getContent(), HttpStatus.OK);
     }
@@ -53,7 +53,7 @@ public class EventPublicController {
     @GetMapping("/{id}")
     public ResponseEntity<EventFullDto> getEvent(@PathVariable(name = "id") Long id, HttpServletRequest request) {
         log.info("Получение события с id={}", id);
-        eventService.postRequestToStat(request);
-        return new ResponseEntity<>(eventService.getEventBuIdShortDto(id), HttpStatus.OK);
+        eventService.addStatisticsToStatServer(request);
+        return new ResponseEntity<>(eventService.getPublishedEventById(id), HttpStatus.OK);
     }
 }
