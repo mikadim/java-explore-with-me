@@ -27,15 +27,15 @@ import java.util.List;
 @Controller
 @RequestMapping("/admin/events")
 public class EventController {
-    private final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
     private final EventService eventService;
 
     @GetMapping
     public ResponseEntity<List<EventFullDto>> getUserEvents(@RequestParam(name = "users", required = false) List<Long> users,
                                                             @RequestParam(name = "states", required = false) List<String> states,
                                                             @RequestParam(name = "categories", required = false) List<Integer> categories,
-                                                            @RequestParam(name = "rangeStart", required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
-                                                            @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
+                                                            @RequestParam(name = "rangeStart", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeStart,
+                                                            @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeEnd,
                                                             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                             @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получение событий пользователей id={}", users);

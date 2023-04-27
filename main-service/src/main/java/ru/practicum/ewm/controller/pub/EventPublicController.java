@@ -25,15 +25,15 @@ import java.util.List;
 @Controller
 @RequestMapping("/events")
 public class EventPublicController {
-    private final String DATE_TIME_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    private static final String DATE_TIME = "yyyy-MM-dd HH:mm:ss";
     private final EventService eventService;
 
     @GetMapping()
     public ResponseEntity<List<EventShortDto>> getEvents(@RequestParam(value = "text", required = false) String text,
                                                          @RequestParam(name = "categories", required = false) List<Integer> categories,
                                                          @RequestParam(name = "paid", required = false) Boolean paid,
-                                                         @RequestParam(name = "rangeStart", required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeStart,
-                                                         @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = DATE_TIME_FORMAT) LocalDateTime rangeEnd,
+                                                         @RequestParam(name = "rangeStart", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeStart,
+                                                         @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeEnd,
                                                          @RequestParam(name = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
                                                          @RequestParam(name = "sort", required = false) String sort,
                                                          @PositiveOrZero  @RequestParam(name = "from", defaultValue = "0") Integer from,
