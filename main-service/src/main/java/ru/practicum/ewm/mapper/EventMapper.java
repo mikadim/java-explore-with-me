@@ -3,6 +3,7 @@ package ru.practicum.ewm.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
 import ru.practicum.ewm.model.Event;
@@ -24,4 +25,8 @@ public interface EventMapper {
     EventShortDto toEventShortDto(Event event);
 
     List<EventShortDto> toEventShortDtos(List<Event> event);
+
+    @Mapping(source = "lat", target = "location.lat")
+    @Mapping(source = "lon", target = "location.lon")
+    EventFullDto toEventFullDto(Event event);
 }

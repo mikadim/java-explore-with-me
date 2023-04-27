@@ -280,7 +280,6 @@ public class EventServiceImpl implements EventService {
             }
         return new PageImpl<>(eventShortDtos.stream().sorted(comparing).collect(Collectors.toList()),
                 eventPage.getPageable(), eventPage.getTotalElements());
-
     }
 
     @Override

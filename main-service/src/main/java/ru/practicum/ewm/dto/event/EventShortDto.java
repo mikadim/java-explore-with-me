@@ -6,8 +6,6 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.dto.user.UserShortDto;
-import ru.practicum.ewm.model.Category;
-import ru.practicum.ewm.model.User;
 
 import java.time.LocalDateTime;
 
@@ -26,8 +24,6 @@ public class EventShortDto {
     private Boolean paid;
     private String title;
     private Long views;
-
-
 
     public EventShortDto(Long id) {
         this.id = id;
