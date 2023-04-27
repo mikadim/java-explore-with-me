@@ -78,11 +78,20 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public List<EventShortDto> getEventsList(Set<Event> events) {
-        if (events.size() > 0) {
-            Set<Long> eventsId = events.stream().map(Event::getId).collect(Collectors.toSet());
-            List<EventShortDto> eventShortDtos = eventRepository.getEventsWithConfirmedRequestShortView(eventsId);
-            return setViewsEventShortDto(eventShortDtos);
+    public List<EventShortDto> getEventsList(Set<Event> eventsForGenerationDto) {
+        if (eventsForGenerationDto.size() > 0) {
+            Set<Long> eventsId = eventsForGenerationDto.stream().map(Event::getId).collect(Collectors.toSet());
+            List<Event> events = eventRepository.getEventsFromSet(eventsId);
+            List<EventShortDto> eventShortDtos = mapper.toEventShortDtos(events);
+            Map<Long, Long> eventViews = getEventViews(events);
+            if (eventViews.size() > 0) {
+                for (EventShortDto dto : eventShortDtos) {
+                    if (eventViews.containsKey(dto.getId())) {
+                        dto.setViews(eventViews.get(dto.getId()));
+                    }
+                }
+            }
+            return eventShortDtos;
         }
         return Collections.emptyList();
     }
@@ -228,7 +237,7 @@ public class EventServiceImpl implements EventService {
 
     @Override
     public Page<EventFullDto> getEventsByFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
-             LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
+                                                 LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
         Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "eventDate");
         Pageable page = PageRequest.of(from / size, size, sortByEventDate);
         Page<EventFullDto> eventDtosPage = eventRepository.getAllUserEvents(userIds, eventStatus, categories, rangeStart,
@@ -238,18 +247,26 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventShortDto> getEventsByFiltersShortDto(String text, List<Integer> categories, Boolean
-            paid, LocalDateTime rangeStart,
-                                                          LocalDateTime rangeEnd, Boolean onlyAvailable, String sort,
-                                                          Integer from, Integer size) {
+    public Page<EventShortDto> getEventsByFiltersShortDto(String text, List<Integer> categories, Boolean paid,
+                                                          LocalDateTime rangeStart, LocalDateTime rangeEnd,
+                                                          Boolean onlyAvailable, String sort, Integer from, Integer size) {
         if (!StringUtils.isBlank(text)) {
             text = text.trim().toLowerCase();
         }
         Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "id");
         Pageable page = PageRequest.of(from / size, size, sortByEventDate);
-        Page<EventShortDto> eventDtosPage = eventRepository.getEventsShortView(text, categories, paid, rangeStart,
+        Page<Event> eventPage = eventRepository.getEventsWithPublicFilters(text, categories, paid, rangeStart,
                 rangeEnd, onlyAvailable, page);
-        List<EventShortDto> eventDtos = setViewsEventShortDto(eventDtosPage.getContent());
+        List<Event> events = eventPage.getContent();
+        List<EventShortDto> eventShortDtos = mapper.toEventShortDtos(events);
+        Map<Long, Long> eventViews = getEventViews(events);
+        if (eventViews.size() > 0) {
+            for (EventShortDto dto : eventShortDtos) {
+                if (eventViews.containsKey(dto.getId())) {
+                    dto.setViews(eventViews.get(dto.getId()));
+                }
+            }
+        }
 
         Comparator<EventShortDto> comparing = Comparator.comparing(EventShortDto::getId);
         if (!StringUtils.isBlank(sort))
@@ -261,8 +278,9 @@ public class EventServiceImpl implements EventService {
                     comparing = Comparator.comparing(EventShortDto::getViews);
                     break;
             }
-        return new PageImpl<>(eventDtos.stream().sorted(comparing).collect(Collectors.toList()),
-                eventDtosPage.getPageable(), eventDtosPage.getTotalElements());
+        return new PageImpl<>(eventShortDtos.stream().sorted(comparing).collect(Collectors.toList()),
+                eventPage.getPageable(), eventPage.getTotalElements());
+
     }
 
     @Override
@@ -280,19 +298,6 @@ public class EventServiceImpl implements EventService {
         StatDto statDto = new StatDto(applicationName, request.getRequestURI(), request.getRemoteAddr(),
                 LocalDateTime.now().format(DateTimeFormatter.ofPattern(DATE_TIME_FORMATTER)));
         restClient.post(statDto);
-    }
-
-    private List<EventShortDto> setViewsEventShortDto(List<EventShortDto> eventShortDtos) {
-        Set<Long> eventsId = eventShortDtos.stream().map(EventShortDto::getId).collect(Collectors.toSet());
-        Map<Long, Long> stats = getStats(LocalDateTime.of(2000, 1, 1, 00, 00), LocalDateTime.now(), false, eventsId);
-        if (stats.size() > 0) {
-            for (EventShortDto dto : eventShortDtos) {
-                if (stats.containsKey(dto.getId())) {
-                    dto.setViews(stats.get(dto.getId()));
-                }
-            }
-        }
-        return eventShortDtos;
     }
 
     private List<EventFullDto> setViewsEventFullDto(List<EventFullDto> eventFullDto) {
@@ -357,5 +362,14 @@ public class EventServiceImpl implements EventService {
                 throw new ConstraintException("Cannot reject the event because it's not in the right state: PUBLISHED");
             }
         }
+    }
+
+    private Map<Long, Long> getEventViews(List<Event> events) {
+        Set<Long> eventsId = events.stream().map(Event::getId).collect(Collectors.toSet());
+        LocalDateTime startCountEventViews = events.stream()
+                .filter(event -> event.getPublishedOn() != null)
+                .map(Event::getPublishedOn)
+                .min(LocalDateTime::compareTo).or(() -> Optional.of(LocalDateTime.now())).get();
+        return getStats(startCountEventViews, LocalDateTime.now(), true, eventsId);
     }
 }

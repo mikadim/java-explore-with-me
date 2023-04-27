@@ -1,6 +1,7 @@
 package ru.practicum.ewm.model;
 
 import lombok.*;
+import org.hibernate.annotations.Formula;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -45,4 +46,6 @@ public class Event {
     private EventStatus state;
     @Column(nullable = false, length = 120)
     private String title;
+    @Formula("(select count(r.id) from requests r where r.event_id = id and (r.status = 'CONFIRMED' or participant_limit = 0))")
+    private Long views;
 }

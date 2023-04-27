@@ -3,8 +3,11 @@ package ru.practicum.ewm.mapper;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
+import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
 import ru.practicum.ewm.model.Event;
+
+import java.util.List;
 
 @Mapper(componentModel = "spring", nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
 public interface EventMapper {
@@ -18,4 +21,7 @@ public interface EventMapper {
     @Mapping(target = "state", constant = "PENDING")
     Event toEvent(NewEventDto event);
 
+    EventShortDto toEventShortDto(Event event);
+
+    List<EventShortDto> toEventShortDtos(List<Event> event);
 }
