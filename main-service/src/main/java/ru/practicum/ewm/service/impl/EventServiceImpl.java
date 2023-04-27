@@ -10,6 +10,7 @@ import org.springframework.data.domain.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import ru.practicum.dto.StatCountDto;
 import ru.practicum.dto.StatDto;
@@ -36,6 +37,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+@Transactional(readOnly = true)
 @Service
 public class EventServiceImpl implements EventService {
     private static final String EVENT_PATH = "/events/";
@@ -66,6 +68,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventFullDto createEvent(NewEventDto dto, Long userId) {
         Event event = mapper.toEvent(dto);
         event.setInitiator(userRepository.getReferenceById(userId));
@@ -95,6 +98,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public EventRequestStatusUpdateResultDto updateRequestsStatuses(Long userId, Long eventId, EventRequestStatusUpdateRequest dto) {
         List<EventFullDto> eventFullDtos = eventRepository.getEventsWithConfirmedRequestFullView(List.of(eventId), userId);
         if (eventFullDtos.isEmpty()) {
@@ -146,6 +150,7 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    @Transactional
     public <T extends UpdateEventRequestDto> EventFullDto updateEvent(Long userId, Long eventId, T dto) {
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Event with id=%d was not found", eventId)));
@@ -197,7 +202,6 @@ public class EventServiceImpl implements EventService {
                             event.setState(status);
                         });
             }
-
         }
         if (dto instanceof UpdateEventAdminRequestDto) {
             if (((UpdateEventAdminRequestDto) dto).getStateAction() != null) {
@@ -214,14 +218,9 @@ public class EventServiceImpl implements EventService {
         if (!StringUtils.isBlank(dto.getTitle())) {
             event.setTitle(dto.getTitle());
         }
-        eventRepository.save(event);
-        return
-
-                getUserEventById(userId, eventId);
-
+       // eventRepository.save(event);
+        return getUserEventById(userId, eventId);
     }
-
-
 
     @Override
     public Page<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size) {

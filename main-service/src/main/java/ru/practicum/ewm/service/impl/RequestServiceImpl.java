@@ -2,6 +2,7 @@ package ru.practicum.ewm.service.impl;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.dto.ParticipationRequestDto;
 import ru.practicum.ewm.exception.ConstraintException;
 import ru.practicum.ewm.exception.ObjectNotFoundException;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Transactional(readOnly = true)
 @AllArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
@@ -26,6 +28,7 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper mapper;
 
     @Override
+    @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ObjectNotFoundException("Event with id=" +
                 eventId + " was not found"));
@@ -62,12 +65,13 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
+    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         Request request = requestRepository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> new ObjectNotFoundException("Request with idss=" + requestId + " was not found"));
         if (request.getStatus() != RequestStatus.CANCELED) {
             request.setStatus(RequestStatus.CANCELED);
-            requestRepository.save(request);
+    //        requestRepository.save(request);
         }
         return mapper.toParticipationRequestDto(request);
     }

@@ -5,6 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.practicum.ewm.dto.compilation.CompilationDto;
 import ru.practicum.ewm.dto.compilation.NewCompilationDto;
 import ru.practicum.ewm.dto.compilation.UpdateCompilationDto;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 
 
 @Service
+@Transactional(readOnly = true)
 @AllArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
@@ -32,6 +34,7 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventService eventService;
 
     @Override
+    @Transactional
     public CompilationDto createCompilation(NewCompilationDto dto) {
         if (dto.getEvents() == null) {
             dto.setEvents(Collections.emptySet());
@@ -43,6 +46,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
+    @Transactional
     public CompilationDto updateCompilation(Long compId, UpdateCompilationDto dto) {
         Compilation compilation = compilationRepository.findById(compId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Compilation with id=%d was not found", compId)));
@@ -59,13 +63,14 @@ public class CompilationServiceImpl implements CompilationService {
         if (!StringUtils.isEmpty(dto.getTitle())) {
             compilation.setTitle(dto.getTitle());
         }
-        compilationRepository.save(compilation);
+      //  compilationRepository.save(compilation);
         CompilationDto compilationDto = mapper.toCompilationDto(compilation);
         compilationDto.setEvents(eventService.getEventsList(compilation.getEvents()));
         return compilationDto;
     }
 
     @Override
+    @Transactional
     public void deleteCompilation(Long compId) {
         try {
             compilationRepository.deleteById(compId);

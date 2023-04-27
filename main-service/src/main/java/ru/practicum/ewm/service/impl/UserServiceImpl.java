@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 import ru.practicum.ewm.dto.user.UserDto;
 import ru.practicum.ewm.exception.ObjectNotFoundException;
@@ -15,17 +16,20 @@ import ru.practicum.ewm.service.UserService;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class UserServiceImpl implements UserService {
     private final UserRepository repository;
     private final UserMapper mapper;
 
     @Override
+    @Transactional
     public UserDto createUser(UserDto dto) {
         return mapper.toUserDto(repository.save(mapper.toUser(dto)));
     }
 
     @Override
+    @Transactional
     public void deleteUser(Long userId) {
         try {
             repository.deleteById(userId);
