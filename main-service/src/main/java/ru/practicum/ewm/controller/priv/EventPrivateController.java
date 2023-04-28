@@ -11,7 +11,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.ParticipationRequestDto;
 import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.event.eventupdate.UpdateEventUserRequestDto;
+import ru.practicum.ewm.model.ReactionOnEvent;
 import ru.practicum.ewm.service.EventService;
+import ru.practicum.ewm.service.ReactionService;
 import ru.practicum.ewm.service.RequestService;
 
 import javax.validation.Valid;
@@ -27,6 +29,7 @@ import java.util.List;
 public class EventPrivateController {
     private final EventService eventService;
     private final RequestService requestService;
+    private final ReactionService reactionService;
 
     @PostMapping
     public ResponseEntity<EventFullDto> createEvent(@RequestBody @Valid NewEventDto dto,
@@ -72,5 +75,14 @@ public class EventPrivateController {
         log.info("Получение событий пользователя id={}", userId);
         Page<EventFullDto> allUserEvents = eventService.getAllUserEvents(userId, from, size);
         return new ResponseEntity<>(allUserEvents.getContent(), HttpStatus.OK);
+    }
+
+    @PostMapping("/{eventId}/reaction")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void createReactionOnEvent(@PathVariable(name = "userId") Long userId,
+                                      @PathVariable(name = "eventId") Long eventId,
+                                      @RequestParam(name = "react") ReactionOnEvent.ReactionStatus react) {
+        log.info("Добавление пользователем id={} на событие  id={}, реакции: {}", userId, eventId, react);
+        reactionService.createOrUpdateReaction(userId, eventId, react);
     }
 }
