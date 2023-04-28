@@ -60,7 +60,7 @@ public class CompilationServiceImpl implements CompilationService {
         if (dto.getPinned() != null) {
             compilation.setPinned(dto.getPinned());
         }
-        if (!StringUtils.isEmpty(dto.getTitle())) {
+        if (!StringUtils.isBlank(dto.getTitle())) {
             compilation.setTitle(dto.getTitle());
         }
         CompilationDto compilationDto = mapper.toCompilationDto(compilation);
@@ -88,7 +88,7 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    public Page<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
+    public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         Sort sortById = Sort.by(Sort.Direction.DESC, "id");
         Pageable page = PageRequest.of(from / size, size, sortById);
         Page<Compilation> compilationsPage = compilationRepository.getCompilations(pinned, page);
@@ -118,8 +118,7 @@ public class CompilationServiceImpl implements CompilationService {
             compilationDto.setEvents(compilationEventDtos.stream()
                     .sorted(Comparator.comparing(EventShortDto::getEventDate).reversed()).collect(Collectors.toList()));
         }
-        return new PageImpl<>(compilationDtos.stream()
-                .sorted(Comparator.comparing(CompilationDto::getId)).collect(Collectors.toList()),
-                compilationsPage.getPageable(), compilationsPage.getTotalElements());
+        return compilationDtos.stream()
+                .sorted(Comparator.comparing(CompilationDto::getId)).collect(Collectors.toList());
     }
 }

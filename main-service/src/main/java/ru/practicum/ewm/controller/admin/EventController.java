@@ -2,9 +2,8 @@ package ru.practicum.ewm.controller.admin;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.CollectionUtils;
@@ -48,15 +47,15 @@ public class EventController {
                         "IllegalArgumentException: For input string: " + state)));
             }
         }
-        Page<EventFullDto> eventsByFilters = eventService.getEventsForPrivateUsersWithFilters(users, eventStatuses, categories, rangeStart, rangeEnd, from,
+        List<EventFullDto> eventsByFilters = eventService.getEventsForPrivateUsersWithFilters(users, eventStatuses, categories, rangeStart, rangeEnd, from,
                 size, null);
-        return new ResponseEntity<>(eventsByFilters.getContent(), HttpStatus.OK);
+        return ResponseEntity.ok(eventsByFilters);
     }
 
     @PatchMapping("/{eventId}")
     public ResponseEntity<EventFullDto> updateEvent(@RequestBody UpdateEventAdminRequestDto dto,
                                                     @PathVariable(name = "eventId") Long eventId) {
         log.info("Обновление события id={} на: {}", eventId, dto);
-        return new ResponseEntity<>(eventService.updateEvent(null, eventId, dto), HttpStatus.OK);
+        return ResponseEntity.ok(eventService.updateEvent(null, eventId, dto));
     }
 }

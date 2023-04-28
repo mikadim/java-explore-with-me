@@ -2,15 +2,14 @@ package ru.practicum.ewm.controller.pub;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
+import ru.practicum.ewm.dto.event.EventSortingTypes;
 import ru.practicum.ewm.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -35,7 +34,7 @@ public class EventPublicController {
                                                          @RequestParam(name = "rangeStart", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeStart,
                                                          @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeEnd,
                                                          @RequestParam(name = "onlyAvailable", defaultValue = "false") Boolean onlyAvailable,
-                                                         @RequestParam(name = "sort", required = false) String sort,
+                                                         @RequestParam(name = "sort", required = false) EventSortingTypes sort,
                                                          @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                          @Positive @RequestParam(name = "size", defaultValue = "10") Integer size,
                                                          HttpServletRequest request) {
@@ -45,15 +44,15 @@ public class EventPublicController {
         if (rangeStart == null) {
             rangeStart = LocalDateTime.now();
         }
-        Page<EventShortDto> events = eventService.getEventsForPublicUsersWithFilters(text, categories, paid, rangeStart, rangeEnd,
+        List<EventShortDto> events = eventService.getEventsForPublicUsersWithFilters(text, categories, paid, rangeStart, rangeEnd,
                 onlyAvailable, sort, from, size);
-        return new ResponseEntity<>(events.getContent(), HttpStatus.OK);
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EventFullDto> getEvent(@PathVariable(name = "id") Long id, HttpServletRequest request) {
         log.info("Получение события с id={}", id);
         eventService.addStatisticsToStatServer(request);
-        return new ResponseEntity<>(eventService.getPublishedEventById(id), HttpStatus.OK);
+        return ResponseEntity.ok(eventService.getPublishedEventById(id));
     }
 }

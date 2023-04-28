@@ -31,7 +31,7 @@ public class CompilationController {
     public ResponseEntity<CompilationDto> updateCompilation(@RequestBody @Valid UpdateCompilationDto dto,
                                                             @PathVariable(name = "compId") Long compId) {
         log.info("Обновление подборки id={}: {}", compId, dto);
-        return new ResponseEntity<>(service.updateCompilation(compId, dto), HttpStatus.OK);
+        return ResponseEntity.ok(service.updateCompilation(compId, dto));
     }
 
     @DeleteMapping("/{compId}")

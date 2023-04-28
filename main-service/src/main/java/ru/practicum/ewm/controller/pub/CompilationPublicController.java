@@ -2,8 +2,6 @@ package ru.practicum.ewm.controller.pub;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +24,7 @@ public class CompilationPublicController {
     @GetMapping("/{compId}")
     public ResponseEntity<CompilationDto> getCompilation(@PathVariable("compId") Long compId) {
         log.info("Получение подборки id={}", compId);
-        return new ResponseEntity<>(service.getCompilation(compId), HttpStatus.OK);
+        return ResponseEntity.ok(service.getCompilation(compId));
     }
 
     @GetMapping()
@@ -34,7 +32,6 @@ public class CompilationPublicController {
                                                                 @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                                 @Positive  @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получение категорий с позиции={}, размер={}", from, size);
-        Page<CompilationDto> compilations = service.getCompilations(pinned, from, size);
-        return new ResponseEntity<>(compilations.getContent(), HttpStatus.OK);
+        return ResponseEntity.ok(service.getCompilations(pinned, from, size));
     }
 }

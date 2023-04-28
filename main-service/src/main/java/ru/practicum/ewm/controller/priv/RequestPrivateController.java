@@ -28,13 +28,13 @@ public class RequestPrivateController {
     @GetMapping
     public ResponseEntity<List<ParticipationRequestDto>> getRequests(@PathVariable(name = "userId") Long userId) {
         log.info("Получение всех запросов пользователя id={}", userId);
-        return new ResponseEntity(service.getRequests(userId), HttpStatus.OK);
+        return ResponseEntity.ok(service.getRequests(userId));
     }
 
     @PatchMapping("/{requestId}/cancel")
     public ResponseEntity<ParticipationRequestDto> cancelRequest(@PathVariable(name = "userId") Long userId,
                                                                  @PathVariable(name = "requestId") Long requestId) {
         log.info("Отмена запроса id={}, пользователем id={}", requestId, userId);
-        return new ResponseEntity(service.cancelRequest(userId, requestId), HttpStatus.OK);
+        return ResponseEntity.ok(service.cancelRequest(userId, requestId));
     }
 }

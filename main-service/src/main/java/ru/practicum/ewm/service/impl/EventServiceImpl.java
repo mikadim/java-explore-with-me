@@ -85,9 +85,7 @@ public class EventServiceImpl implements EventService {
             Map<Long, Long> eventViews = getEventViews(events);
             if (eventViews.size() > 0) {
                 for (EventShortDto dto : eventShortDtos) {
-                    if (eventViews.containsKey(dto.getId())) {
-                        dto.setViews(eventViews.get(dto.getId()));
-                    }
+                    dto.setViews(eventViews.getOrDefault(dto.getId(), 0L));
                 }
             }
             return eventShortDtos;
@@ -232,12 +230,12 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    public Page<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size) {
+    public List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size) {
         return getEventsForPrivateUsersWithFilters(List.of(userId), null, null, null, null, from, size, null);
     }
 
     @Override
-    public Page<EventFullDto> getEventsForPrivateUsersWithFilters(List<Long> userIds, List<EventStatus> eventStatus,
+    public List<EventFullDto> getEventsForPrivateUsersWithFilters(List<Long> userIds, List<EventStatus> eventStatus,
                                                                   List<Integer> categories, LocalDateTime rangeStart,
                                                                   LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
         Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "eventDate");
@@ -249,18 +247,17 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> eventViews = getEventViews(events);
         if (eventViews.size() > 0) {
             for (EventFullDto dto : eventFullDtos) {
-                if (eventViews.containsKey(dto.getId())) {
-                    dto.setViews(eventViews.get(dto.getId()));
-                }
+                dto.setViews(eventViews.getOrDefault(dto.getId(), 0L));
             }
         }
-        return new PageImpl<>(eventFullDtos, eventsPage.getPageable(), eventsPage.getTotalElements());
+        return eventFullDtos;
     }
 
     @Override
-    public Page<EventShortDto> getEventsForPublicUsersWithFilters(String text, List<Integer> categories, Boolean paid,
+    public List<EventShortDto> getEventsForPublicUsersWithFilters(String text, List<Integer> categories, Boolean paid,
                                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd,
-                                                                  Boolean onlyAvailable, String sort, Integer from, Integer size) {
+                                                                  Boolean onlyAvailable, EventSortingTypes sort,
+                                                                  Integer from, Integer size) {
         if (!StringUtils.isBlank(text)) {
             text = text.trim().toLowerCase();
         }
@@ -273,24 +270,21 @@ public class EventServiceImpl implements EventService {
         Map<Long, Long> eventViews = getEventViews(events);
         if (eventViews.size() > 0) {
             for (EventShortDto dto : eventShortDtos) {
-                if (eventViews.containsKey(dto.getId())) {
-                    dto.setViews(eventViews.get(dto.getId()));
-                }
+                dto.setViews(eventViews.getOrDefault(dto.getId(), 0L));
             }
         }
 
         Comparator<EventShortDto> comparing = Comparator.comparing(EventShortDto::getId);
-        if (!StringUtils.isBlank(sort))
-            switch (sort.trim().toLowerCase()) {
-                case "event_date":
+        if (sort != null)
+            switch (sort) {
+                case EVENT_DATE:
                     comparing = Comparator.comparing(EventShortDto::getEventDate);
                     break;
-                case "views":
+                case VIEWS:
                     comparing = Comparator.comparing(EventShortDto::getViews);
                     break;
             }
-        return new PageImpl<>(eventShortDtos.stream().sorted(comparing).collect(Collectors.toList()),
-                eventPage.getPageable(), eventPage.getTotalElements());
+        return eventShortDtos.stream().sorted(comparing).collect(Collectors.toList());
     }
 
     @Override
@@ -339,7 +333,7 @@ public class EventServiceImpl implements EventService {
         LocalDateTime startCountEventViews = events.stream()
                 .filter(event -> event.getPublishedOn() != null)
                 .map(Event::getPublishedOn)
-                .min(LocalDateTime::compareTo).or(() -> Optional.of(LocalDateTime.now())).get();
+                .min(LocalDateTime::compareTo).orElseGet(LocalDateTime::now);
         return getStatsFromStatServer(startCountEventViews, LocalDateTime.now(), true, eventsId);
     }
 

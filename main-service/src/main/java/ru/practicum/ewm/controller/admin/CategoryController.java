@@ -36,6 +36,6 @@ public class CategoryController {
                                                      @PathVariable(name = "catId") Integer catId) {
         dto.setId(catId);
         log.info("Обновление категории: {}", dto);
-        return new ResponseEntity<>(service.updateCategory(dto), HttpStatus.OK);
+        return ResponseEntity.ok(service.updateCategory(dto));
     }
 }

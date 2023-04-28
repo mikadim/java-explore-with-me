@@ -1,6 +1,5 @@
 package ru.practicum.ewm.service;
 
-import org.springframework.data.domain.Page;
 import ru.practicum.ewm.dto.user.UserDto;
 
 import java.util.List;
@@ -10,5 +9,5 @@ public interface UserService {
 
     void deleteUser(Long userId);
 
-    Page<UserDto> getUsers(List<Long> ids, Integer from, Integer size);
+    List<UserDto> getUsers(List<Long> ids, Integer from, Integer size);
 }

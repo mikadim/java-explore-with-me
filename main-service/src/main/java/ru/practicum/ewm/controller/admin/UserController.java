@@ -34,7 +34,7 @@ public class UserController {
                                                   @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                   @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получение пользователей с id={}", ids);
-        return new ResponseEntity<>(service.getUsers(ids, from, size).getContent(), HttpStatus.OK);
+        return ResponseEntity.ok(service.getUsers(ids, from, size));
     }
 
     @DeleteMapping("/{userId}")

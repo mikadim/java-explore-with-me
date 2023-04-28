@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS event_likes;
 DROP TABLE IF EXISTS compilation_events;
 DROP TABLE IF EXISTS compilations;
 DROP TABLE IF EXISTS requests;

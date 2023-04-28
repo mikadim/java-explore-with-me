@@ -39,17 +39,17 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public Page<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
+    public List<UserDto> getUsers(List<Long> ids, Integer from, Integer size) {
         List<UserDto> userDtos;
         if (CollectionUtils.isEmpty(ids)) {
             Sort sortById = Sort.by(Sort.Direction.ASC, "id");
             Pageable page = PageRequest.of(from / size, size, sortById);
             Page<User> usersPage = repository.findAll(page);
             userDtos = mapper.toUserDtos(usersPage.getContent());
-            return new PageImpl<>(userDtos, usersPage.getPageable(), usersPage.getTotalElements());
+            return userDtos;
         } else {
             userDtos = mapper.toUserDtos(repository.findAllById(ids));
-            return new PageImpl<>(userDtos);
+            return userDtos;
         }
     }
 }

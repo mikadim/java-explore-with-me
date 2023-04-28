@@ -47,12 +47,12 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    public Page<CategoryDto> getCategories(Integer from, Integer size) {
+    public List<CategoryDto> getCategories(Integer from, Integer size) {
         Sort sortById = Sort.by(Sort.Direction.ASC, "id");
         Pageable page = PageRequest.of(from / size, size, sortById);
         Page<Category> categoriesPage = repository.findAll(page);
         List<CategoryDto> categoryDtos = mapper.toCategoryDtos(categoriesPage.getContent());
-        return new PageImpl<>(categoryDtos, categoriesPage.getPageable(), categoriesPage.getTotalElements());
+        return categoryDtos;
     }
 
     @Override

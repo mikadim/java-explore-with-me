@@ -2,7 +2,6 @@ package ru.practicum.ewm.controller.priv;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -39,7 +38,7 @@ public class EventPrivateController {
     public ResponseEntity<EventFullDto> getUserEventById(@PathVariable(name = "userId") Long userId,
                                                          @PathVariable(name = "eventId") Long eventId) {
         log.info("Получение пользователем id={}, события id={}", userId, eventId);
-        return new ResponseEntity<>(eventService.getUserEventById(userId, eventId), HttpStatus.OK);
+        return ResponseEntity.ok(eventService.getUserEventById(userId, eventId));
     }
 
     @PatchMapping("/{eventId}/requests")
@@ -47,14 +46,14 @@ public class EventPrivateController {
                                                                                     @PathVariable(name = "userId") Long userId,
                                                                                     @PathVariable(name = "eventId") Long eventId) {
         log.info("Обновления пользователем id={}, в событии id={}, статуса заявок: {}", userId, eventId, dto);
-        return new ResponseEntity<>(eventService.updateRequestsStatuses(userId, eventId, dto), HttpStatus.OK);
+        return ResponseEntity.ok(eventService.updateRequestsStatuses(userId, eventId, dto));
     }
 
     @GetMapping("/{eventId}/requests")
     public ResponseEntity<List<ParticipationRequestDto>> getEventRequests(@PathVariable(name = "userId") Long userId,
                                                                           @PathVariable(name = "eventId") Long eventId) {
         log.info("Получение пользователем id={} запросов на участие в событии id={}", userId, eventId);
-        return new ResponseEntity<>(requestService.getUserEventRequests(userId, eventId), HttpStatus.OK);
+        return ResponseEntity.ok(requestService.getUserEventRequests(userId, eventId));
     }
 
     @PatchMapping("/{eventId}")
@@ -62,7 +61,7 @@ public class EventPrivateController {
                                                     @PathVariable(name = "userId") Long userId,
                                                     @PathVariable(name = "eventId") Long eventId) {
         log.info("Обновления пользователем id={}, события id={}", userId, eventId);
-        return new ResponseEntity<>(eventService.updateEvent(userId, eventId, dto), HttpStatus.OK);
+        return ResponseEntity.ok(eventService.updateEvent(userId, eventId, dto));
     }
 
     @GetMapping
@@ -70,7 +69,6 @@ public class EventPrivateController {
                                                             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
                                                             @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
         log.info("Получение событий пользователя id={}", userId);
-        Page<EventFullDto> allUserEvents = eventService.getAllUserEvents(userId, from, size);
-        return new ResponseEntity<>(allUserEvents.getContent(), HttpStatus.OK);
+        return ResponseEntity.ok(eventService.getAllUserEvents(userId, from, size));
     }
 }
