@@ -30,9 +30,11 @@ public class ReactionServiceImpl implements ReactionService {
     @Transactional
     public void createOrUpdateReaction(Long userId, Long eventId, ReactionOnEvent.ReactionStatus react) {
         Optional<ReactionOnEvent> reactionOnEvent = reactionRepository.findByParticipantIdAndEventId(userId, eventId);
-        if (reactionOnEvent.isPresent()) {
+        if (reactionOnEvent.isPresent() && reactionOnEvent.get().getReaction() !=react) {
             reactionOnEvent.get().setReaction(react);
             return;
+        } else {
+
         }
 
 
