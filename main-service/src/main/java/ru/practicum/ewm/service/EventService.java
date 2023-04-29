@@ -4,6 +4,7 @@ import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.event.eventupdate.UpdateEventRequestDto;
 import ru.practicum.ewm.model.Event;
 import ru.practicum.ewm.model.EventStatus;
+import ru.practicum.ewm.model.ReactionOnEvent;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
