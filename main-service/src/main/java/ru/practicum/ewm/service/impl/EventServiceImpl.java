@@ -119,14 +119,14 @@ public class EventServiceImpl implements EventService {
     public EventWithReactionFullDto getUserEventById(Long userId, Long eventId) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Event with id=%d was not found", eventId)));
-        EventWithReactionFullDto EventWithReactionFullDto = mapper.toEventWithReactionFullDto(event);
+        EventWithReactionFullDto eventWithReactionFullDto = mapper.toEventWithReactionFullDto(event);
         Map<Long, Long> eventViews = getEventViews(List.of(event));
-        if (eventViews.containsKey(EventWithReactionFullDto.getId())) {
-            EventWithReactionFullDto.setViews(eventViews.get(EventWithReactionFullDto.getId()));
+        if (eventViews.containsKey(eventWithReactionFullDto.getId())) {
+            eventWithReactionFullDto.setViews(eventViews.get(eventWithReactionFullDto.getId()));
         }
         List<ReactionOnEvent> reactionsOnEvent = ratingRepository.findFirst3ByEventIdOrderByTimestampDesc(eventId);
-        EventWithReactionFullDto.setUserReactions(ratingMapper.toReactionOnEventDtos(reactionsOnEvent));
-        return EventWithReactionFullDto;
+        eventWithReactionFullDto.setUserReactions(ratingMapper.toReactionOnEventDtos(reactionsOnEvent));
+        return eventWithReactionFullDto;
     }
 
     @Override
@@ -245,14 +245,14 @@ public class EventServiceImpl implements EventService {
         if (!StringUtils.isBlank(dto.getTitle())) {
             event.setTitle(dto.getTitle());
         }
-        EventWithReactionFullDto EventWithReactionFullDto = mapper.toEventWithReactionFullDto(event);
+        EventWithReactionFullDto eventWithReactionFullDto = mapper.toEventWithReactionFullDto(event);
         Map<Long, Long> eventViews = getEventViews(List.of(event));
-        if (eventViews.containsKey(EventWithReactionFullDto.getId())) {
-            EventWithReactionFullDto.setViews(eventViews.get(EventWithReactionFullDto.getId()));
+        if (eventViews.containsKey(eventWithReactionFullDto.getId())) {
+            eventWithReactionFullDto.setViews(eventViews.get(eventWithReactionFullDto.getId()));
         }
         List<ReactionOnEvent> reactionsOnEvent = ratingRepository.findFirst3ByEventIdOrderByTimestampDesc(eventId);
-        EventWithReactionFullDto.setUserReactions(ratingMapper.toReactionOnEventDtos(reactionsOnEvent));
-        return EventWithReactionFullDto;
+        eventWithReactionFullDto.setUserReactions(ratingMapper.toReactionOnEventDtos(reactionsOnEvent));
+        return eventWithReactionFullDto;
     }
 
     @Override
