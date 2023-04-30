@@ -11,5 +11,6 @@ import java.util.List;
 public interface RatingMapper {
     @Mapping(target = "eventId", source = "event.id")
     ReactionOnEventDto toReactionOnEventDto(ReactionOnEvent reaction);
+
     List<ReactionOnEventDto> toReactionOnEventDtos(List<ReactionOnEvent> reaction);
 }
