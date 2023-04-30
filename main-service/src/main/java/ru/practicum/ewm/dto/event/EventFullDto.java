@@ -6,13 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.practicum.ewm.dto.CategoryDto;
 import ru.practicum.ewm.dto.LocationDto;
-import ru.practicum.ewm.dto.ReactionOnEventDto;
 import ru.practicum.ewm.dto.user.UserShortDto;
 import ru.practicum.ewm.model.EventStatus;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -40,7 +38,6 @@ public class EventFullDto {
     private String title;
     private Long views;
     private Long rating;
-    private List<ReactionOnEventDto> userReactions;
 
     public EventFullDto(Long id) {
         this.id = id;

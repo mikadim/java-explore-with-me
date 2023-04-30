@@ -15,11 +15,11 @@ public interface EventService {
 
     List<EventShortDto> getEventsList(Set<Event> events);
 
-    EventFullDto getUserEventById(Long userId, Long eventId);
+    EventWithReactionFullDto getUserEventById(Long userId, Long eventId);
 
     EventRequestStatusUpdateResultDto updateRequestsStatuses(Long userId, Long eventId, EventRequestStatusUpdateRequest dto);
 
-    <T extends UpdateEventRequestDto> EventFullDto updateEvent(Long userId, Long eventId, T dto);
+    <T extends UpdateEventRequestDto> EventWithReactionFullDto updateEvent(Long userId, Long eventId, T dto);
 
     List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size, EventSortingTypes sort);
 

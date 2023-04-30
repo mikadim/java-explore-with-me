@@ -45,7 +45,7 @@ public class EventPrivateController {
     }
 
     @GetMapping("/events/{eventId}")
-    public ResponseEntity<EventFullDto> getUserEventById(@PathVariable(name = "userId") Long userId,
+    public ResponseEntity<EventWithReactionFullDto> getUserEventById(@PathVariable(name = "userId") Long userId,
                                                          @PathVariable(name = "eventId") Long eventId) {
         log.info("Получение пользователем id={}, события id={}", userId, eventId);
         return ResponseEntity.ok(eventService.getUserEventById(userId, eventId));
@@ -67,7 +67,7 @@ public class EventPrivateController {
     }
 
     @PatchMapping("/events/{eventId}")
-    public ResponseEntity<EventFullDto> updateEvent(@RequestBody @Valid UpdateEventUserRequestDto dto,
+    public ResponseEntity<EventWithReactionFullDto> updateEvent(@RequestBody @Valid UpdateEventUserRequestDto dto,
                                                     @PathVariable(name = "userId") Long userId,
                                                     @PathVariable(name = "eventId") Long eventId) {
         log.info("Обновления пользователем id={}, события id={}", userId, eventId);
