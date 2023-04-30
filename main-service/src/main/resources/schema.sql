@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS event_likes(
     id_event BIGINT NOT NULL,
     id_user BIGINT NOT NULL,
     reaction VARCHAR(50),
+    created TIMESTAMP NOT NULL,
     CONSTRAINT pk_event_likes PRIMARY KEY (id),
     CONSTRAINT fk_event_likes_events FOREIGN KEY (id_event) REFERENCES events (id) ON DELETE CASCADE ON UPDATE CASCADE,
     CONSTRAINT fk_event_likes_users FOREIGN KEY (id_user) REFERENCES users (id) ON DELETE CASCADE ON UPDATE CASCADE,

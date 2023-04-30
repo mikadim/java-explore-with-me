@@ -31,8 +31,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "or ( " +
             "(:#{#rangeStart == null} = true or a.eventDate >= :rangeStart) and (:#{#rangeEnd == null} = true or a.eventDate <= :rangeEnd)) " +
             ") " +
-            "and (:#{#eventId == null} = true or a.id = :eventId) " +
-            "order by a.eventDate DESC"
+            "and (:#{#eventId == null} = true or a.id = :eventId) "
     )
     Page<Event> getEventsForPrivateUsers(@Param("userIds") List<Long> userIds, @Param("eventStatuses") List<EventStatus> eventStatuses,
                                          @Param("categories") List<Integer> categories, @Param("rangeStart") LocalDateTime rangeStart,
@@ -57,4 +56,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                         @Param("paid") Boolean paid, @Param("rangeStart") LocalDateTime rangeStart,
                                         @Param("rangeEnd") LocalDateTime rangeEnd, @Param("onlyAvailable") Boolean onlyAvailable,
                                         Pageable page);
+
+    Page<Event> findByEventDateGreaterThanAndState(LocalDateTime startTime, EventStatus state, Pageable page);
 }

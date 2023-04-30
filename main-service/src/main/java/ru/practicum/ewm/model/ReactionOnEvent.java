@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,6 +27,8 @@ public class ReactionOnEvent {
     @Enumerated(EnumType.STRING)
     @Column(length = 50)
     private ReactionStatus reaction;
+    @Column(name = "created", nullable = false)
+    private LocalDateTime timestamp;
 
     public enum ReactionStatus {
         LIKE,

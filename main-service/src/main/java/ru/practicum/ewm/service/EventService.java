@@ -4,7 +4,6 @@ import ru.practicum.ewm.dto.event.*;
 import ru.practicum.ewm.dto.event.eventupdate.UpdateEventRequestDto;
 import ru.practicum.ewm.model.Event;
 import ru.practicum.ewm.model.EventStatus;
-import ru.practicum.ewm.model.ReactionOnEvent;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -22,11 +21,11 @@ public interface EventService {
 
     <T extends UpdateEventRequestDto> EventFullDto updateEvent(Long userId, Long eventId, T dto);
 
-    List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size);
+    List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size, EventSortingTypes sort);
 
     List<EventFullDto> getEventsForPrivateUsersWithFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
                                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size,
-                                                           Long eventId);
+                                                           Long eventId, EventSortingTypes sort);
 
     List<EventShortDto> getEventsForPublicUsersWithFilters(String text, List<Integer> categories, Boolean paid,
                                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
@@ -35,4 +34,6 @@ public interface EventService {
     EventFullDto getPublishedEventById(Long id);
 
     void addStatisticsToStatServer(HttpServletRequest request);
+
+    List<EventFullDto> getMostRatingEvents(Integer from, Integer size);
 }

@@ -23,12 +23,10 @@ import ru.practicum.ewm.dto.event.eventupdate.UpdateEventUserRequestDto;
 import ru.practicum.ewm.exception.ConstraintException;
 import ru.practicum.ewm.exception.ObjectNotFoundException;
 import ru.practicum.ewm.mapper.EventMapper;
+import ru.practicum.ewm.mapper.RatingMapper;
 import ru.practicum.ewm.mapper.RequestMapper;
 import ru.practicum.ewm.model.*;
-import ru.practicum.ewm.repository.CategoryRepository;
-import ru.practicum.ewm.repository.EventRepository;
-import ru.practicum.ewm.repository.RequestRepository;
-import ru.practicum.ewm.repository.UserRepository;
+import ru.practicum.ewm.repository.*;
 import ru.practicum.ewm.service.EventService;
 
 import javax.servlet.http.HttpServletRequest;
@@ -51,11 +49,14 @@ public class EventServiceImpl implements EventService {
     private final ObjectMapper objectMapper;
     private final RequestMapper requestMapper;
     private final String applicationName;
+    private final RatingRepository ratingRepository;
+    private final RatingMapper ratingMapper;
 
     @Autowired
     public EventServiceImpl(EventRepository eventRepository, UserRepository userRepository, RequestRepository requestRepository,
                             CategoryRepository categoryRepository, EventMapper mapper, StatRestClient restClient,
-                            ObjectMapper objectMapper, RequestMapper requestMapper, @Value("${spring.application.name}") String appName) {
+                            ObjectMapper objectMapper, RequestMapper requestMapper, @Value("${spring.application.name}") String appName,
+                            RatingRepository ratingRepository, RatingMapper ratingMapper) {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.requestRepository = requestRepository;
@@ -65,6 +66,8 @@ public class EventServiceImpl implements EventService {
         this.objectMapper = objectMapper;
         this.requestMapper = requestMapper;
         this.applicationName = appName;
+        this.ratingRepository = ratingRepository;
+        this.ratingMapper = ratingMapper;
     }
 
     @Override
@@ -94,6 +97,25 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
+    public List<EventFullDto> getMostRatingEvents(Integer from, Integer size) {
+        Sort sortByRating = Sort.by(Sort.Direction.DESC, "rating");
+        Pageable page = PageRequest.of(from / size, size, sortByRating);
+        Page<Event> eventsPage = eventRepository.findByEventDateGreaterThanAndState(LocalDateTime.now(), EventStatus.PUBLISHED, page);
+        List<Event> events = eventsPage.getContent();
+        if (events.size() > 0) {
+            List<EventFullDto> eventFullDtos = mapper.toEventFullDtos(events);
+            Map<Long, Long> eventViews = getEventViews(events);
+            if (eventViews.size() > 0) {
+                for (EventFullDto dto : eventFullDtos) {
+                    dto.setViews(eventViews.getOrDefault(dto.getId(), 0L));
+                }
+            }
+            return eventFullDtos;
+        }
+        return Collections.emptyList();
+    }
+
+    @Override
     public EventFullDto getUserEventById(Long userId, Long eventId) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Event with id=%d was not found", eventId)));
@@ -102,6 +124,8 @@ public class EventServiceImpl implements EventService {
         if (eventViews.containsKey(eventFullDto.getId())) {
             eventFullDto.setViews(eventViews.get(eventFullDto.getId()));
         }
+        List<ReactionOnEvent> reactionsOnEvent = ratingRepository.findFirst3ByEventIdOrderByTimestampDesc(eventId);
+        eventFullDto.setUserReactions(ratingMapper.toReactionOnEventDtos(reactionsOnEvent));
         return eventFullDto;
     }
 
@@ -226,20 +250,29 @@ public class EventServiceImpl implements EventService {
         if (eventViews.containsKey(eventFullDto.getId())) {
             eventFullDto.setViews(eventViews.get(eventFullDto.getId()));
         }
+        List<ReactionOnEvent> reactionsOnEvent = ratingRepository.findFirst3ByEventIdOrderByTimestampDesc(eventId);
+        eventFullDto.setUserReactions(ratingMapper.toReactionOnEventDtos(reactionsOnEvent));
         return eventFullDto;
     }
 
     @Override
-    public List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size) {
-        return getEventsForPrivateUsersWithFilters(List.of(userId), null, null, null, null, from, size, null);
+    public List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size, EventSortingTypes sort) {
+        List<EventFullDto> eventDtos = getEventsForPrivateUsersWithFilters(List.of(userId), null, null, null, null, from, size, null, sort);
+        return eventDtos;
     }
 
     @Override
     public List<EventFullDto> getEventsForPrivateUsersWithFilters(List<Long> userIds, List<EventStatus> eventStatus,
                                                                   List<Integer> categories, LocalDateTime rangeStart,
-                                                                  LocalDateTime rangeEnd, Integer from, Integer size, Long eventId) {
-        Sort sortByEventDate = Sort.by(Sort.Direction.DESC, "eventDate");
-        Pageable page = PageRequest.of(from / size, size, sortByEventDate);
+                                                                  LocalDateTime rangeEnd, Integer from, Integer size,
+                                                                  Long eventId, EventSortingTypes sort) {
+        Sort sortBy;
+        if (sort == EventSortingTypes.RATING) {
+            sortBy = Sort.by(Sort.Direction.DESC, "rating");
+        } else {
+            sortBy = Sort.by(Sort.Direction.DESC, "eventDate");
+        }
+        Pageable page = PageRequest.of(from / size, size, sortBy);
         Page<Event> eventsPage = eventRepository.getEventsForPrivateUsers(userIds, eventStatus, categories, rangeStart,
                 rangeEnd, eventId, page);
         List<Event> events = eventsPage.getContent();

@@ -55,4 +55,11 @@ public class EventPublicController {
         eventService.addStatisticsToStatServer(request);
         return ResponseEntity.ok(eventService.getPublishedEventById(id));
     }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<EventFullDto>> getMostRatingEvents(@PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
+                                                         @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+        log.info("Получение предстоящих наиболее популярных событий");
+        return ResponseEntity.ok(eventService.getMostRatingEvents(from, size));
+    }
 }

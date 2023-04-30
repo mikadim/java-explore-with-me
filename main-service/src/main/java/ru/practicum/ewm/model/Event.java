@@ -53,5 +53,5 @@ public class Event {
             "left join event_likes c on a.id=c.id and c.reaction = 'DISLIKE' " +
             "where a.id_event = id " +
             ")")
-    private Long rate;
+    private Long rating;
 }
