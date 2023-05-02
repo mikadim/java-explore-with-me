@@ -20,6 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     interface UserRating {
         User getUser();
+
         Long getRate();
     }
 }
