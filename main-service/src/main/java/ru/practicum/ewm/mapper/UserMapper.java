@@ -6,7 +6,7 @@ import ru.practicum.ewm.dto.user.UserDto;
 import ru.practicum.ewm.dto.user.UserRatingDto;
 import ru.practicum.ewm.dto.user.UserShortDto;
 import ru.practicum.ewm.model.User;
-import ru.practicum.ewm.repository.projection.UserRating;
+import ru.practicum.ewm.repository.UserRepository;
 
 import java.util.List;
 
@@ -24,7 +24,7 @@ public interface UserMapper {
 
     @Mapping(target = "id", source = "user.id")
     @Mapping(target = "name", source = "user.name")
-    UserRatingDto toUserRatingDto(UserRating userRating);
+    UserRatingDto toUserRatingDto(UserRepository.UserRating userRating);
 
-    List<UserRatingDto> toUserRatingDtos(List<UserRating> userRating);
+    List<UserRatingDto> toUserRatingDtos(List<UserRepository.UserRating> userRating);
 }

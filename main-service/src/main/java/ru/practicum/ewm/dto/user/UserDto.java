@@ -1,21 +1,19 @@
 package ru.practicum.ewm.dto.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Value;
 
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
-@AllArgsConstructor
-@Data
+@Value
 public class UserDto {
-    private Long id;
+    Long id;
     @NotBlank
     @Size(max = 50)
-    private String name;
+    String name;
     @NotBlank
     @Email
     @Size(max = 50)
-    private String email;
+    String email;
 }

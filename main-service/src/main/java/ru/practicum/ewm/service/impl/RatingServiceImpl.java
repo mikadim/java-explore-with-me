@@ -20,10 +20,8 @@ import ru.practicum.ewm.repository.RatingRepository;
 import ru.practicum.ewm.repository.RequestRepository;
 import ru.practicum.ewm.service.RatingService;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
-@Transactional(readOnly = true)
 @AllArgsConstructor
 @Service
 public class RatingServiceImpl implements RatingService {
@@ -33,16 +31,11 @@ public class RatingServiceImpl implements RatingService {
     private final EventRepository eventRepository;
 
     @Override
-    @Transactional
     public ReactionOnEventDto createReaction(Long userId, Long eventId, ReactionOnEvent.ReactionStatus reactionStatus) {
         Request request = requestRepository.findByEventIdAndRequesterIdAndEventState(eventId, userId, EventStatus.PUBLISHED)
                 .orElseThrow(() -> new ConstraintException("Событие id=" + eventId + " недоступно, либо вы не подавали " +
                         "заявку на участие в нем"));
-        ReactionOnEvent reaction = new ReactionOnEvent();
-        reaction.setParticipant(request.getRequester());
-        reaction.setEvent(request.getEvent());
-        reaction.setReaction(reactionStatus);
-        reaction.setTimestamp(LocalDateTime.now());
+        ReactionOnEvent reaction = ratingMapper.toReactionOnEvent(request, reactionStatus);
         ratingRepository.save(reaction);
         return ratingMapper.toReactionOnEventDto(reaction);
     }
@@ -61,13 +54,13 @@ public class RatingServiceImpl implements RatingService {
     }
 
     @Override
-    @Transactional
     public void deleteReaction(Long userId, Long eventId) {
         ReactionOnEvent reactionOnEvent = ratingRepository.findByParticipantIdAndEventId(userId, eventId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Пользователь id=%d еще не оставлял реакцию на событие id=%d", userId, eventId)));
         ratingRepository.deleteById(reactionOnEvent.getId());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ReactionOnEventDto> getReactionsOnEvent(Long eventId, Integer from, Integer size) {
         Event event = eventRepository.findById(eventId)

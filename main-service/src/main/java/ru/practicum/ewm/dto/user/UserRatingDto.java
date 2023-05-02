@@ -1,14 +1,10 @@
 package ru.practicum.ewm.dto.user;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+@Value
 public class UserRatingDto {
-    private Long id;
-    private String name;
-    private Long rate;
+    Long id;
+    String name;
+    Long rate;
 }

@@ -35,7 +35,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
-@Transactional(readOnly = true)
 @Service
 public class EventServiceImpl implements EventService {
     private static final String EVENT_PATH = "/events/";
@@ -71,7 +70,6 @@ public class EventServiceImpl implements EventService {
     }
 
     @Override
-    @Transactional
     public EventFullDto createEvent(NewEventDto dto, Long userId) {
         Event event = mapper.toEvent(dto);
         event.setInitiator(userRepository.getReferenceById(userId));
@@ -79,6 +77,7 @@ public class EventServiceImpl implements EventService {
         return mapper.toEventFullDto(eventRepository.save(event));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getEventsList(Set<Event> eventsForGenerationDto) {
         if (eventsForGenerationDto.size() > 0) {
@@ -96,6 +95,7 @@ public class EventServiceImpl implements EventService {
         return Collections.emptyList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> getMostRatingEvents(Integer from, Integer size) {
         Sort sortByRating = Sort.by(Sort.Direction.DESC, "rating");
@@ -115,6 +115,7 @@ public class EventServiceImpl implements EventService {
         return Collections.emptyList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventWithReactionFullDto getUserEventById(Long userId, Long eventId) {
         Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
@@ -255,12 +256,14 @@ public class EventServiceImpl implements EventService {
         return eventWithReactionFullDto;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size, EventSortingTypes sort) {
         List<EventFullDto> eventDtos = getEventsForPrivateUsersWithFilters(List.of(userId), null, null, null, null, from, size, null, sort);
         return eventDtos;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> getEventsForPrivateUsersWithFilters(List<Long> userIds, List<EventStatus> eventStatus,
                                                                   List<Integer> categories, LocalDateTime rangeStart,
@@ -286,6 +289,7 @@ public class EventServiceImpl implements EventService {
         return eventFullDtos;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<EventShortDto> getEventsForPublicUsersWithFilters(String text, List<Integer> categories, Boolean paid,
                                                                   LocalDateTime rangeStart, LocalDateTime rangeEnd,
@@ -320,6 +324,7 @@ public class EventServiceImpl implements EventService {
         return eventShortDtos.stream().sorted(comparing).collect(Collectors.toList());
     }
 
+    @Transactional(readOnly = true)
     @Override
     public EventFullDto getPublishedEventById(Long eventId) {
         Event event = eventRepository.findByIdAndState(eventId, EventStatus.PUBLISHED)
@@ -332,6 +337,7 @@ public class EventServiceImpl implements EventService {
         return eventFullDto;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public void addStatisticsToStatServer(HttpServletRequest request) {
         StatDto statDto = new StatDto(applicationName, request.getRequestURI(), request.getRemoteAddr(),
