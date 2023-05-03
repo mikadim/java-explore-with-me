@@ -15,17 +15,17 @@ public interface EventService {
 
     List<EventShortDto> getEventsList(Set<Event> events);
 
-    EventFullDto getUserEventById(Long userId, Long eventId);
+    EventWithReactionFullDto getUserEventById(Long userId, Long eventId);
 
     EventRequestStatusUpdateResultDto updateRequestsStatuses(Long userId, Long eventId, EventRequestStatusUpdateRequest dto);
 
-    <T extends UpdateEventRequestDto> EventFullDto updateEvent(Long userId, Long eventId, T dto);
+    <T extends UpdateEventRequestDto> EventWithReactionFullDto updateEvent(Long userId, Long eventId, T dto);
 
-    List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size);
+    List<EventFullDto> getAllUserEvents(Long userId, Integer from, Integer size, EventSortingTypes sort);
 
     List<EventFullDto> getEventsForPrivateUsersWithFilters(List<Long> userIds, List<EventStatus> eventStatus, List<Integer> categories,
                                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, Integer from, Integer size,
-                                                           Long eventId);
+                                                           Long eventId, EventSortingTypes sort);
 
     List<EventShortDto> getEventsForPublicUsersWithFilters(String text, List<Integer> categories, Boolean paid,
                                                            LocalDateTime rangeStart, LocalDateTime rangeEnd, Boolean onlyAvailable,
@@ -34,4 +34,6 @@ public interface EventService {
     EventFullDto getPublishedEventById(Long id);
 
     void addStatisticsToStatServer(HttpServletRequest request);
+
+    List<EventFullDto> getMostRatingEvents(Integer from, Integer size);
 }

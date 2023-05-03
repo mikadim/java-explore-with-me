@@ -1,12 +1,15 @@
 package ru.practicum.ewm.mapper;
 
+import org.mapstruct.IterableMapping;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import ru.practicum.ewm.dto.event.EventFullDto;
+import ru.practicum.ewm.dto.event.EventWithReactionFullDto;
 import ru.practicum.ewm.dto.event.EventShortDto;
 import ru.practicum.ewm.dto.event.NewEventDto;
 import ru.practicum.ewm.model.Event;
+import ru.practicum.ewm.repository.EventRepository;
 
 import java.util.List;
 
@@ -28,7 +31,33 @@ public interface EventMapper {
 
     @Mapping(source = "lat", target = "location.lat")
     @Mapping(source = "lon", target = "location.lon")
-    EventFullDto toEventFullDto(Event event);
+    EventFullDto toEventFullDtoWithoutRating(Event event);
 
-    List<EventFullDto> toEventFullDtos(List<Event> event);
+    @Mapping(source = "event.lat", target = "location.lat")
+    @Mapping(source = "event.lon", target = "location.lon")
+    @Mapping(source = "event.annotation", target = "annotation")
+    @Mapping(source = "event.category", target = "category")
+    @Mapping(source = "event.confirmedRequests", target = "confirmedRequests")
+    @Mapping(source = "event.createdOn", target = "createdOn")
+    @Mapping(source = "event.description", target = "description")
+    @Mapping(source = "event.eventDate", target = "eventDate")
+    @Mapping(source = "event.id", target = "id")
+    @Mapping(source = "event.initiator", target = "initiator")
+    @Mapping(source = "event.paid", target = "paid")
+    @Mapping(source = "event.participantLimit", target = "participantLimit")
+    @Mapping(source = "event.publishedOn", target = "publishedOn")
+    @Mapping(source = "event.requestModeration", target = "requestModeration")
+    @Mapping(source = "event.state", target = "state")
+    @Mapping(source = "event.title", target = "title")
+    @Mapping(source = "rating", target = "rating")
+    EventFullDto toEventFullDto(EventRepository.EventWithRating event);
+
+
+    @IterableMapping(elementTargetType = EventFullDto.class)
+    List<EventFullDto> toEventFullDtos(List<EventRepository.EventWithRating> event);
+
+    @Mapping(source = "event.lat", target = "location.lat")
+    @Mapping(source = "event.lon", target = "location.lon")
+    @Mapping(source = "rating", target = "rating")
+    EventWithReactionFullDto toEventWithReactionFullDto(Event event, Long rating);
 }

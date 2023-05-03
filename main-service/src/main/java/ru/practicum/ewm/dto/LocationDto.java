@@ -1,17 +1,13 @@
 package ru.practicum.ewm.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 import javax.validation.constraints.NotNull;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Data
+@Value
 public class LocationDto {
     @NotNull
-    private Float lat;
+    Float lat;
     @NotNull
-    private Float lon;
+    Float lon;
 }

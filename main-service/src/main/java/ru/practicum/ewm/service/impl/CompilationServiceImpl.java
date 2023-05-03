@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 
 @Service
-@Transactional(readOnly = true)
 @AllArgsConstructor
 public class CompilationServiceImpl implements CompilationService {
     private final CompilationRepository compilationRepository;
@@ -34,7 +33,6 @@ public class CompilationServiceImpl implements CompilationService {
     private final EventService eventService;
 
     @Override
-    @Transactional
     public CompilationDto createCompilation(NewCompilationDto dto) {
         if (dto.getEvents() == null) {
             dto.setEvents(Collections.emptySet());
@@ -69,7 +67,6 @@ public class CompilationServiceImpl implements CompilationService {
     }
 
     @Override
-    @Transactional
     public void deleteCompilation(Long compId) {
         try {
             compilationRepository.deleteById(compId);
@@ -78,6 +75,7 @@ public class CompilationServiceImpl implements CompilationService {
         }
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CompilationDto getCompilation(Long compId) {
         Compilation compilation = compilationRepository.findById(compId)
@@ -87,6 +85,7 @@ public class CompilationServiceImpl implements CompilationService {
         return compilationDto;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<CompilationDto> getCompilations(Boolean pinned, Integer from, Integer size) {
         Sort sortById = Sort.by(Sort.Direction.DESC, "id");

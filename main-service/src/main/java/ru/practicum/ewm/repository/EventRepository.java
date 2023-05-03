@@ -20,9 +20,17 @@ public interface EventRepository extends JpaRepository<Event, Long> {
 
     Optional<Event> findByIdAndInitiatorId(Long eventId, Long userId);
 
-    Optional<Event> findByIdAndState(Long eventId, EventStatus state);
+    @Query("select a as event, (count(b.id) - count(c.id)) as rating from Event a " +
+            "left join ReactionOnEvent b on b.event = a and b.reaction = 'LIKE' " +
+            "left join ReactionOnEvent c on c.event = a and c.reaction = 'DISLIKE' " +
+            "where a.id = :eventId and a.state = :state " +
+            "group by a"
+    )
+    Optional<EventWithRating> findByIdAndState(Long eventId, EventStatus state);
 
-    @Query("select a from Event a " +
+    @Query("select a as event, (count(b.id) - count(c.id)) as rating from Event a " +
+            "left join ReactionOnEvent b on b.event = a and b.reaction = 'LIKE' " +
+            "left join ReactionOnEvent c on c.event = a and c.reaction = 'DISLIKE' " +
             "where (:#{#userIds == null} = true or a.initiator.id in :userIds) " +
             "and (:#{#categories == null} = true or a.category.id in :categories) " +
             "and (:#{#eventStatuses == null} = true or a.state in :eventStatuses) " +
@@ -32,11 +40,11 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "(:#{#rangeStart == null} = true or a.eventDate >= :rangeStart) and (:#{#rangeEnd == null} = true or a.eventDate <= :rangeEnd)) " +
             ") " +
             "and (:#{#eventId == null} = true or a.id = :eventId) " +
-            "order by a.eventDate DESC"
+            "group by a"
     )
-    Page<Event> getEventsForPrivateUsers(@Param("userIds") List<Long> userIds, @Param("eventStatuses") List<EventStatus> eventStatuses,
-                                         @Param("categories") List<Integer> categories, @Param("rangeStart") LocalDateTime rangeStart,
-                                         @Param("rangeEnd") LocalDateTime rangeEnd, @Param("eventId") Long eventId, Pageable page);
+    Page<EventWithRating> getEventsForPrivateUsers(@Param("userIds") List<Long> userIds, @Param("eventStatuses") List<EventStatus> eventStatuses,
+                                                   @Param("categories") List<Integer> categories, @Param("rangeStart") LocalDateTime rangeStart,
+                                                   @Param("rangeEnd") LocalDateTime rangeEnd, @Param("eventId") Long eventId, Pageable page);
 
 
     @Query("select a from Event a " +
@@ -57,4 +65,27 @@ public interface EventRepository extends JpaRepository<Event, Long> {
                                         @Param("paid") Boolean paid, @Param("rangeStart") LocalDateTime rangeStart,
                                         @Param("rangeEnd") LocalDateTime rangeEnd, @Param("onlyAvailable") Boolean onlyAvailable,
                                         Pageable page);
+
+    @Query("select a as event, (count(b.id) - count(c.id)) as rating from Event a " +
+            "left join ReactionOnEvent b on b.event = a and b.reaction = 'LIKE' " +
+            "left join ReactionOnEvent c on c.event = a and c.reaction = 'DISLIKE' " +
+            "where a.eventDate > :startTime and a.state = :state " +
+            "group by a " +
+            "order by rating desc"
+    )
+    Page<EventWithRating> findByEventDateGreaterThanAndState(@Param("startTime") LocalDateTime startTime, @Param("state") EventStatus state, Pageable page);
+
+    @Query("select a as event, (count(b.id) - count(c.id)) as rating from Event a " +
+            "left join ReactionOnEvent b on b.event = a and b.reaction = 'LIKE' " +
+            "left join ReactionOnEvent c on c.event = a and c.reaction = 'DISLIKE' " +
+            "where a.id = :eventId and a.initiator.id = :userId " +
+            "group by a"
+    )
+    Optional<EventWithRating> findByIdAndInitiatorIdWithRating(@Param("eventId") Long eventId, @Param("userId") Long userId);
+
+    interface EventWithRating {
+        Event getEvent();
+
+        Long getRating();
+    }
 }

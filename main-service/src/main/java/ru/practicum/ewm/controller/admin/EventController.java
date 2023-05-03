@@ -10,6 +10,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.practicum.ewm.dto.event.EventFullDto;
+import ru.practicum.ewm.dto.event.EventSortingTypes;
 import ru.practicum.ewm.dto.event.eventupdate.UpdateEventAdminRequestDto;
 import ru.practicum.ewm.model.EventStatus;
 import ru.practicum.ewm.service.EventService;
@@ -36,7 +37,8 @@ public class EventController {
                                                             @RequestParam(name = "rangeStart", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeStart,
                                                             @RequestParam(name = "rangeEnd", required = false) @DateTimeFormat(pattern = DATE_TIME) LocalDateTime rangeEnd,
                                                             @PositiveOrZero @RequestParam(name = "from", defaultValue = "0") Integer from,
-                                                            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size) {
+                                                            @Positive @RequestParam(name = "size", defaultValue = "10") Integer size,
+                                                            @RequestParam(name = "sort", defaultValue = "EVENT_DATE") EventSortingTypes sort) {
         log.info("Получение событий пользователей id={}", users);
         List<EventStatus> eventStatuses = null;
         if (!CollectionUtils.isEmpty(states)) {
@@ -48,7 +50,7 @@ public class EventController {
             }
         }
         List<EventFullDto> eventsByFilters = eventService.getEventsForPrivateUsersWithFilters(users, eventStatuses, categories, rangeStart, rangeEnd, from,
-                size, null);
+                size, null, sort);
         return ResponseEntity.ok(eventsByFilters);
     }
 

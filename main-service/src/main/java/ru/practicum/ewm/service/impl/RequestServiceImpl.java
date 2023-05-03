@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-@Transactional(readOnly = true)
 @AllArgsConstructor
 public class RequestServiceImpl implements RequestService {
     private final RequestRepository requestRepository;
@@ -28,7 +27,6 @@ public class RequestServiceImpl implements RequestService {
     private final RequestMapper mapper;
 
     @Override
-    @Transactional
     public ParticipationRequestDto createRequest(Long userId, Long eventId) {
         Event event = eventRepository.findById(eventId).orElseThrow(() -> new ObjectNotFoundException("Event with id=" +
                 eventId + " was not found"));
@@ -52,6 +50,7 @@ public class RequestServiceImpl implements RequestService {
         return mapper.toParticipationRequestDto(requestRepository.save(request));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ParticipationRequestDto> getRequests(Long userId) {
         List<Request> requests;
@@ -65,7 +64,6 @@ public class RequestServiceImpl implements RequestService {
     }
 
     @Override
-    @Transactional
     public ParticipationRequestDto cancelRequest(Long userId, Long requestId) {
         Request request = requestRepository.findByIdAndRequesterId(requestId, userId)
                 .orElseThrow(() -> new ObjectNotFoundException("Request with idss=" + requestId + " was not found"));
@@ -75,6 +73,7 @@ public class RequestServiceImpl implements RequestService {
         return mapper.toParticipationRequestDto(request);
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<ParticipationRequestDto> getUserEventRequests(Long userId, Long eventId) {
         try {

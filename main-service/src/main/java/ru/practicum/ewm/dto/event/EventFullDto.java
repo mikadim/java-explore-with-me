@@ -37,6 +37,7 @@ public class EventFullDto {
     private EventStatus state;
     private String title;
     private Long views;
+    private Long rating;
 
     public EventFullDto(Long id) {
         this.id = id;

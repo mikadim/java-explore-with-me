@@ -15,21 +15,18 @@ import ru.practicum.ewm.service.CategoryService;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 @AllArgsConstructor
 public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper mapper;
     private final CategoryRepository repository;
 
     @Override
-    @Transactional
     public CategoryDto createCategory(CategoryDto dto) {
         dto.setName(dto.getName().trim());
         return mapper.toCategoryDto(repository.save(mapper.toCategory(dto)));
     }
 
     @Override
-    @Transactional
     public void deleteCategory(Integer catId) {
         try {
             repository.deleteById(catId);
@@ -46,6 +43,7 @@ public class CategoryServiceImpl implements CategoryService {
         return mapper.toCategoryDto(repository.save(mapper.toCategory(dto)));
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<CategoryDto> getCategories(Integer from, Integer size) {
         Sort sortById = Sort.by(Sort.Direction.ASC, "id");
@@ -55,6 +53,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoryDtos;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public CategoryDto getCategory(Integer catId) {
         return mapper.toCategoryDto(repository.findById(catId)
