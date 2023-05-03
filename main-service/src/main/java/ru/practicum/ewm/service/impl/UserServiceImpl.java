@@ -15,9 +15,7 @@ import ru.practicum.ewm.repository.UserRepository;
 import ru.practicum.ewm.service.UserService;
 
 import java.time.LocalDateTime;
-import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
