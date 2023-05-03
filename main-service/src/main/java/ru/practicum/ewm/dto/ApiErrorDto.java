@@ -1,19 +1,17 @@
 package ru.practicum.ewm.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.Value;
 
 import java.time.LocalDateTime;
 
-@Data
-@NoArgsConstructor
+@Value
 public class ApiErrorDto {
-    private String status;
-    private String reason;
-    private String message;
+    String status;
+    String reason;
+    String message;
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime timestamp;
+    LocalDateTime timestamp;
 
     public ApiErrorDto(String status, String reason, String message) {
         this.status = status;

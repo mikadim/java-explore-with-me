@@ -11,10 +11,13 @@ import java.time.LocalDateTime;
 
 public interface UserRepository extends JpaRepository<User, Long> {
 
-    @Query("select u, sum(e.rating) as rate " +
+    @Query("select u as user, (count(a.id) - count(b.id)) as rate " +
             "from User u " +
             "inner join Event e on e.initiator = u and e.publishedOn > :eventDate " +
-            "group by u"
+            "left join ReactionOnEvent a on a.event = e and a.reaction = 'LIKE' " +
+            "left join ReactionOnEvent b on b.event = e and b.reaction = 'DISLIKE' " +
+            "group by u " +
+            "order by rate DESC"
     )
     Page<UserRating> getMostRateUser(@Param("eventDate") LocalDateTime eventPublishedDate, Pageable page);
 

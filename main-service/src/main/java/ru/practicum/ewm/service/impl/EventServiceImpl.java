@@ -74,7 +74,7 @@ public class EventServiceImpl implements EventService {
         Event event = mapper.toEvent(dto);
         event.setInitiator(userRepository.getReferenceById(userId));
         event.setCategory(categoryRepository.getReferenceById(event.getCategory().getId()));
-        return mapper.toEventFullDto(eventRepository.save(event));
+        return mapper.toEventFullDtoWithoutRating(eventRepository.save(event));
     }
 
     @Transactional(readOnly = true)
@@ -100,11 +100,11 @@ public class EventServiceImpl implements EventService {
     public List<EventFullDto> getMostRatingEvents(Integer from, Integer size) {
         Sort sortByRating = Sort.by(Sort.Direction.DESC, "rating");
         Pageable page = PageRequest.of(from / size, size, sortByRating);
-        Page<Event> eventsPage = eventRepository.findByEventDateGreaterThanAndState(LocalDateTime.now(), EventStatus.PUBLISHED, page);
-        List<Event> events = eventsPage.getContent();
-        if (events.size() > 0) {
-            List<EventFullDto> eventFullDtos = mapper.toEventFullDtos(events);
-            Map<Long, Long> eventViews = getEventViews(events);
+        Page<EventRepository.EventWithRating> eventsWithRatingPage = eventRepository.findByEventDateGreaterThanAndState(LocalDateTime.now(), EventStatus.PUBLISHED, page);
+        List<EventRepository.EventWithRating> eventsWithRating = eventsWithRatingPage.getContent();
+        if (eventsWithRating.size() > 0) {
+            List<EventFullDto> eventFullDtos = mapper.toEventFullDtos(eventsWithRating);
+            Map<Long, Long> eventViews = getEventViews(eventsWithRating.stream().map(EventRepository.EventWithRating::getEvent).collect(Collectors.toList()));
             if (eventViews.size() > 0) {
                 for (EventFullDto dto : eventFullDtos) {
                     dto.setViews(eventViews.getOrDefault(dto.getId(), 0L));
@@ -118,10 +118,10 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     @Override
     public EventWithReactionFullDto getUserEventById(Long userId, Long eventId) {
-        Event event = eventRepository.findByIdAndInitiatorId(eventId, userId)
+        EventRepository.EventWithRating eventWithRating = eventRepository.findByIdAndInitiatorIdWithRating(eventId, userId)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Event with id=%d was not found", eventId)));
-        EventWithReactionFullDto eventWithReactionFullDto = mapper.toEventWithReactionFullDto(event);
-        Map<Long, Long> eventViews = getEventViews(List.of(event));
+        EventWithReactionFullDto eventWithReactionFullDto = mapper.toEventWithReactionFullDto(eventWithRating.getEvent(), eventWithRating.getRating());
+        Map<Long, Long> eventViews = getEventViews(List.of(eventWithRating.getEvent()));
         if (eventViews.containsKey(eventWithReactionFullDto.getId())) {
             eventWithReactionFullDto.setViews(eventViews.get(eventWithReactionFullDto.getId()));
         }
@@ -246,7 +246,7 @@ public class EventServiceImpl implements EventService {
         if (!StringUtils.isBlank(dto.getTitle())) {
             event.setTitle(dto.getTitle());
         }
-        EventWithReactionFullDto eventWithReactionFullDto = mapper.toEventWithReactionFullDto(event);
+        EventWithReactionFullDto eventWithReactionFullDto = mapper.toEventWithReactionFullDto(event, ratingRepository.getEventRating(eventId));
         Map<Long, Long> eventViews = getEventViews(List.of(event));
         if (eventViews.containsKey(eventWithReactionFullDto.getId())) {
             eventWithReactionFullDto.setViews(eventViews.get(eventWithReactionFullDto.getId()));
@@ -269,6 +269,7 @@ public class EventServiceImpl implements EventService {
                                                                   List<Integer> categories, LocalDateTime rangeStart,
                                                                   LocalDateTime rangeEnd, Integer from, Integer size,
                                                                   Long eventId, EventSortingTypes sort) {
+
         Sort sortBy;
         if (sort == EventSortingTypes.RATING) {
             sortBy = Sort.by(Sort.Direction.DESC, "rating");
@@ -276,11 +277,11 @@ public class EventServiceImpl implements EventService {
             sortBy = Sort.by(Sort.Direction.DESC, "eventDate");
         }
         Pageable page = PageRequest.of(from / size, size, sortBy);
-        Page<Event> eventsPage = eventRepository.getEventsForPrivateUsers(userIds, eventStatus, categories, rangeStart,
+        Page<EventRepository.EventWithRating> eventsWithRatingPage = eventRepository.getEventsForPrivateUsers(userIds, eventStatus, categories, rangeStart,
                 rangeEnd, eventId, page);
-        List<Event> events = eventsPage.getContent();
-        List<EventFullDto> eventFullDtos = mapper.toEventFullDtos(events);
-        Map<Long, Long> eventViews = getEventViews(events);
+        List<EventRepository.EventWithRating> eventsWithRating = eventsWithRatingPage.getContent();
+        List<EventFullDto> eventFullDtos = mapper.toEventFullDtos(eventsWithRating);
+        Map<Long, Long> eventViews = getEventViews(eventsWithRating.stream().map(EventRepository.EventWithRating::getEvent).collect(Collectors.toList()));
         if (eventViews.size() > 0) {
             for (EventFullDto dto : eventFullDtos) {
                 dto.setViews(eventViews.getOrDefault(dto.getId(), 0L));
@@ -327,17 +328,16 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     @Override
     public EventFullDto getPublishedEventById(Long eventId) {
-        Event event = eventRepository.findByIdAndState(eventId, EventStatus.PUBLISHED)
+        EventRepository.EventWithRating eventWithRating = eventRepository.findByIdAndState(eventId, EventStatus.PUBLISHED)
                 .orElseThrow(() -> new ObjectNotFoundException(String.format("Event with id=%d was not found", eventId)));
-        EventFullDto eventFullDto = mapper.toEventFullDto(event);
-        Map<Long, Long> eventViews = getEventViews(List.of(event));
+        EventFullDto eventFullDto = mapper.toEventFullDto(eventWithRating);
+        Map<Long, Long> eventViews = getEventViews(List.of(eventWithRating.getEvent()));
         if (eventViews.containsKey(eventFullDto.getId())) {
             eventFullDto.setViews(eventViews.get(eventFullDto.getId()));
         }
         return eventFullDto;
     }
 
-    @Transactional(readOnly = true)
     @Override
     public void addStatisticsToStatServer(HttpServletRequest request) {
         StatDto statDto = new StatDto(applicationName, request.getRequestURI(), request.getRemoteAddr(),

@@ -15,7 +15,9 @@ import ru.practicum.ewm.repository.UserRepository;
 import ru.practicum.ewm.service.UserService;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -53,16 +55,17 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-    @Transactional(readOnly = true)
+    @Transactional
     @Override
     public List<UserRatingDto> getMostRatingUser(Integer from, Integer size, LocalDateTime eventPublishedDate) {
-        Sort sortByRating = Sort.by(Sort.Direction.DESC, "rate");
+        Sort sortByRating = Sort.unsorted();
         Pageable page = PageRequest.of(from / size, size, sortByRating);
         if (eventPublishedDate == null) {
             eventPublishedDate = LocalDateTime.now().minusMonths(3);
         }
         Page<UserRepository.UserRating> mostRatingUserPage = repository.getMostRateUser(eventPublishedDate, page);
         List<UserRepository.UserRating> mostRatingUser = mostRatingUserPage.getContent();
-        return mapper.toUserRatingDtos(mostRatingUser);
+        List<UserRatingDto> userRatingDtos = mapper.toUserRatingDtos(mostRatingUser);
+        return userRatingDtos;
     }
 }

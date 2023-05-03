@@ -48,10 +48,4 @@ public class Event {
     private String title;
     @Formula("(select count(r.id) from requests r where r.event_id = id and r.status = 'CONFIRMED')")
     private Long confirmedRequests;
-    @Formula("(select count(b.id) - count(c.id) from event_likes a " +
-            "left join event_likes b on a.id=b.id and b.reaction = 'LIKE' " +
-            "left join event_likes c on a.id=c.id and c.reaction = 'DISLIKE' " +
-            "where a.id_event = id " +
-            ")")
-    private Long rating;
 }
