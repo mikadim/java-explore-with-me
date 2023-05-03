@@ -43,8 +43,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "group by a"
     )
     Page<EventWithRating> getEventsForPrivateUsers(@Param("userIds") List<Long> userIds, @Param("eventStatuses") List<EventStatus> eventStatuses,
-                                         @Param("categories") List<Integer> categories, @Param("rangeStart") LocalDateTime rangeStart,
-                                         @Param("rangeEnd") LocalDateTime rangeEnd, @Param("eventId") Long eventId, Pageable page);
+                                                   @Param("categories") List<Integer> categories, @Param("rangeStart") LocalDateTime rangeStart,
+                                                   @Param("rangeEnd") LocalDateTime rangeEnd, @Param("eventId") Long eventId, Pageable page);
 
 
     @Query("select a from Event a " +
