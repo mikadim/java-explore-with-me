@@ -7,6 +7,7 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -98,7 +99,7 @@ public class EventServiceImpl implements EventService {
     @Transactional(readOnly = true)
     @Override
     public List<EventFullDto> getMostRatingEvents(Integer from, Integer size) {
-        Sort sortByRating = Sort.by(Sort.Direction.DESC, "rating");
+        Sort sortByRating = Sort.unsorted();
         Pageable page = PageRequest.of(from / size, size, sortByRating);
         Page<EventRepository.EventWithRating> eventsWithRatingPage = eventRepository.findByEventDateGreaterThanAndState(LocalDateTime.now(), EventStatus.PUBLISHED, page);
         List<EventRepository.EventWithRating> eventsWithRating = eventsWithRatingPage.getContent();
@@ -272,7 +273,7 @@ public class EventServiceImpl implements EventService {
 
         Sort sortBy;
         if (sort == EventSortingTypes.RATING) {
-            sortBy = Sort.by(Sort.Direction.DESC, "rating");
+            sortBy = JpaSort.unsafe(Sort.Direction.DESC, "(rating)");
         } else {
             sortBy = Sort.by(Sort.Direction.DESC, "eventDate");
         }

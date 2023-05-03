@@ -70,7 +70,8 @@ public interface EventRepository extends JpaRepository<Event, Long> {
             "left join ReactionOnEvent b on b.event = a and b.reaction = 'LIKE' " +
             "left join ReactionOnEvent c on c.event = a and c.reaction = 'DISLIKE' " +
             "where a.eventDate > :startTime and a.state = :state " +
-            "group by a"
+            "group by a " +
+            "order by rating desc"
     )
     Page<EventWithRating> findByEventDateGreaterThanAndState(@Param("startTime") LocalDateTime startTime, @Param("state") EventStatus state, Pageable page);
 
